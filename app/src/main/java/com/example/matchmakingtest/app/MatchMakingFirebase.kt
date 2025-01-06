@@ -15,30 +15,24 @@ class MatchMakingFirebase {
 
     suspend fun requestGame(userInfo: UserInfo): List<UserInfo>? {
         val myRef = FirebaseDatabase.getInstance().getReference("GameRoom")
-        return tryToWrite(myRef, userInfo).firstOrNull()
+        return tryToWrite(myRef, userInfo).firstOrNull()?.toList()?.map {
+            UserInfo(it.first, it.second)
+        }
     }
 
     private fun tryToWrite(dbRef: DatabaseReference, userInfo: UserInfo) = callbackFlow {
-        val uniqueKey: String? = dbRef.push().key
-
-        if (uniqueKey == null) {
-            trySend(null)
-            close()
-            return@callbackFlow
-        }
-
         val transaction = object : Transaction.Handler {
-            var userList: List<UserInfo> = mutableListOf()
+            var userList: MutableMap<String, UserInfoInner> = mutableMapOf()
 
             override fun doTransaction(currentData: MutableData): Transaction.Result {
-                val userInfoMap = convertIntoUnreadable(currentData.value)
+                val userInfoMap = convertIntoUserInfoMap(currentData.value)
                 if (userInfoMap.size == 3) {
-                    userList = convertIntoReadable(userInfoMap.values.toList())
+                    userList = userInfoMap
                     currentData.value = HashMap<String, UserInfo>()
                     return Transaction.success(currentData)
                 }
                 if (userInfoMap.size < 4) {
-                    userInfoMap[uniqueKey] = userInfo
+                    userInfoMap[userInfo.userId] = userInfo.inner
                     currentData.value = userInfoMap
                     return Transaction.success(currentData)
                 }
@@ -55,29 +49,32 @@ class MatchMakingFirebase {
         awaitClose()
     }
 
-    private fun convertIntoUnreadable(obj: Any?): MutableMap<Any, Any> {
-        return try {
+    private fun convertIntoUserInfoMap(obj: Any?): MutableMap<String, UserInfoInner> {
+        val finalConversion = mutableMapOf<String, UserInfoInner>()
+        try {
             @Suppress("UNCHECKED_CAST")
-            obj as MutableMap<Any, Any>
+            val initialConversion = obj as MutableMap<String, Any>
+            for ((key, value) in initialConversion) {
+                finalConversion[key] = convertToUserInfoInner(value)
+            }
         } catch (_: Exception) {
-            mutableMapOf<Any, Any>()
         }
+        return finalConversion
     }
 
-    fun convertIntoReadable(list: List<Any>): List<UserInfo> {
+    private fun convertToUserInfoInner(any: Any): UserInfoInner {
         @Suppress("UNCHECKED_CAST")
-        return list.map { itemAsAny ->
-            val itemAsMap = itemAsAny as HashMap<String, String>
-            UserInfo(
-                userId = itemAsMap["userId"]!!,
-                name = itemAsMap["name"]!!
-            )
-        }
+        val itemAsMap = any as HashMap<String, String>
+        return UserInfoInner(
+            name = itemAsMap["name"]!!
+        )
     }
 
-    data class UserInfo(val userId: String, val name: String) {
+    data class UserInfo(val userId: String, val inner: UserInfoInner) {
         override fun toString(): String {
             return userId
         }
     }
+
+    data class UserInfoInner(val name: String)
 }

@@ -18,7 +18,8 @@ class JoinViewModel @Inject constructor() : ViewModel() {
     fun handleClick(userId: String) {
         Log.i(LOG_TAG, "handle click invoked once")
         viewModelScope.launch(Dispatchers.IO) {
-            val userInfo = MatchMakingFirebase.UserInfo(userId, userId)
+            val userInfoInner = MatchMakingFirebase.UserInfoInner(userId)
+            val userInfo = MatchMakingFirebase.UserInfo(userId, userInfoInner)
             val mates = matchMakingFirebase.requestGame(userInfo)?.toMutableList()
             mates?.let { startGame(mates) }
         }
