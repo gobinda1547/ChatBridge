@@ -42,7 +42,7 @@ fun JoinScreen(
                 singleLine = true
             )
 
-            Button(onClick = { viewModel.handleClick2() }) {
+            Button(onClick = { viewModel.handleClick(inputText.value) }) {
                 Text(text = "click me")
             }
 
