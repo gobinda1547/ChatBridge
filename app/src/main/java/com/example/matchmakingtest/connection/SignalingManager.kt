@@ -25,9 +25,19 @@ class SignalingManager @Inject constructor() {
     }
 
     // Send ICE candidate to Firebase
-    fun sendIceCandidate(roomId: String, path: String, candidate: IceCandidate) {
+    fun sendIceCandidateOld(roomId: String, path: String, candidate: IceCandidate) {
         logI("sending ice candidate")
         signalingRef.child(roomId).child("candidate$path").push().setValue(candidate.sdp)
+    }
+
+    fun sendIceCandidate(roomId: String, path: String, candidate: IceCandidate) {
+        logI("Sending ICE candidate: ${candidate.sdp}")
+        val candidateMap = mapOf(
+            "sdpMid" to candidate.sdpMid,
+            "sdpMLineIndex" to candidate.sdpMLineIndex,
+            "candidate" to candidate.sdp
+        )
+        signalingRef.child(roomId).child("candidate$path").push().setValue(candidateMap)
     }
 
     // Listen for offer from Firebase
@@ -64,7 +74,7 @@ class SignalingManager @Inject constructor() {
     }
 
     // Listen for ICE candidates from Firebase
-    fun listenForCandidates(roomId: String, path: String, callback: (IceCandidate) -> Unit) {
+    fun listenForCandidatesOld(roomId: String, path: String, callback: (IceCandidate) -> Unit) {
         signalingRef.child(roomId).child("candidate$path")
             .addChildEventListener(object : ChildEventListener {
                 override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
@@ -74,6 +84,29 @@ class SignalingManager @Inject constructor() {
                         logI("on candidate received $it")
                         val candidate = IceCandidate("sdpMid", 0, it)
                         callback(candidate)
+                    }
+                }
+
+                override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {}
+                override fun onChildRemoved(snapshot: DataSnapshot) {}
+                override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+                override fun onCancelled(error: DatabaseError) {}
+            })
+    }
+
+    fun listenForCandidates(roomId: String, path: String, onCandidate: (IceCandidate) -> Unit) {
+        signalingRef.child(roomId).child("candidate$path")
+            .addChildEventListener(object : ChildEventListener {
+                override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                    val candidateData = snapshot.value as? Map<*, *> ?: return
+                    val sdpMid = candidateData["sdpMid"] as? String
+                    val sdpMLineIndex = (candidateData["sdpMLineIndex"] as? Long)?.toInt()
+                    val sdp = candidateData["candidate"] as? String
+
+                    if (sdpMid != null && sdpMLineIndex != null && sdp != null) {
+                        val candidate = IceCandidate(sdpMid, sdpMLineIndex, sdp)
+                        logI("Received ICE candidate: $sdp")
+                        onCandidate(candidate)
                     }
                 }
 

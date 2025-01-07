@@ -69,7 +69,7 @@ class WebRTCManager @Inject constructor(
 
                 override fun onIceCandidate(candidate: IceCandidate?) {
                     // Send ICE candidate to remote peer via Firebase
-                    logI("on ice candidate callback")
+                    //logI("on ice candidate callback")
                     candidate?.let { sendCandidateToFirebase(it, role) }
                 }
 
@@ -98,7 +98,7 @@ class WebRTCManager @Inject constructor(
     }
 
     private fun sendCandidateToFirebase(candidate: IceCandidate, role: String) {
-        logI("sending candidate to firebase")
+        //logI("sending candidate to firebase")
         signalingManager.sendIceCandidate(ROOM_ID, role, candidate)
     }
 
