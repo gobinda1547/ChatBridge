@@ -4,6 +4,9 @@ import android.content.Context
 import com.example.matchmakingtest.app.ROOM_ID
 import com.example.matchmakingtest.app.logI
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.webrtc.*
 import java.nio.ByteBuffer
 import javax.inject.Inject
@@ -87,6 +90,11 @@ class WebRTCManager @Inject constructor(
 
                 override fun onDataChannel(channel: DataChannel?) {
                     logI("on data channel invoked")
+                    CoroutineScope(Dispatchers.IO).launch {
+                        logI("sending message started")
+                        sendMessage(channel, "hi there")
+                        logI("sending message done")
+                    }
                 }
 
                 override fun onRenegotiationNeeded() {
@@ -213,9 +221,17 @@ class WebRTCManager @Inject constructor(
             }
 
             override fun onMessage(buffer: DataChannel.Buffer?) {
-                buffer?.let {
-                    val data = String(it.data.array())
-                    logI("Received message: $data")
+                try {
+                    buffer?.let {
+                        val byteBuffer = it.data
+                        val bytes = ByteArray(byteBuffer.remaining()) // Allocate a byte array of appropriate size
+                        byteBuffer.get(bytes) // Copy the data from the ByteBuffer to the byte array
+                        val data = String(bytes) // Convert the byte array to a String
+                        logI("Received message: $data")
+                    }
+                } catch (e: Exception) {
+                    logI("Some error happened: ${e.message}")
+                    e.printStackTrace()
                 }
             }
         })
@@ -223,10 +239,15 @@ class WebRTCManager @Inject constructor(
 
     // Example of sending data
     fun sendMessage(dataChannel: DataChannel?, message: String) {
-        val buffer = DataChannel.Buffer(
-            ByteBuffer.wrap(message.toByteArray()),
-            false  // Indicates binary data (false = text)
-        )
-        dataChannel?.send(buffer)
+        try {
+            val buffer = DataChannel.Buffer(
+                ByteBuffer.wrap(message.toByteArray()),
+                false  // Indicates binary data (false = text)
+            )
+            dataChannel?.send(buffer)
+        }catch (e: Exception) {
+            logI("some error happended")
+            e.printStackTrace()
+        }
     }
 }
