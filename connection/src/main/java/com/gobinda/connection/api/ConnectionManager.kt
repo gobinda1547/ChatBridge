@@ -57,7 +57,7 @@ class ConnectionManager(private val context: Context) {
         }
 
         val receivedAnswer =
-            signalManager.receiveAnswer(partnerRoomId, RECEIVE_OFFER_TIMEOUT).first() ?: let {
+            signalManager.receiveAnswer(partnerRoomId, RECEIVE_ANSWER_TIMEOUT).first() ?: let {
                 le("no answer received")
                 return null // since no answer received
             }
