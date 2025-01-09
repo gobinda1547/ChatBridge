@@ -29,7 +29,7 @@ class RemoteConnector(private val context: Context) {
     private val signalManager = SignalManager(database)
     private val roomPicker = RoomPicker(database)
 
-    suspend fun connect(): RemoteDevice? {
+    suspend fun connect(): RemoteDeviceApi? {
         val myRoomId = System.currentTimeMillis().toString()
         val receivedRoomId = roomPicker.pickOrWait(myRoomId, PICK_ROOM_TIMEOUT).first()
         li("myPrefRoom: [$myRoomId], received: [$receivedRoomId]")

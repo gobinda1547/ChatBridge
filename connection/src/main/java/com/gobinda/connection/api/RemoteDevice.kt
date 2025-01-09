@@ -2,11 +2,17 @@ package com.gobinda.connection.api
 
 import android.content.Context
 import com.gobinda.connection.internal.li
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.withContext
 import org.webrtc.DataChannel
 import org.webrtc.IceCandidate
 import org.webrtc.MediaConstraints
@@ -15,8 +21,15 @@ import org.webrtc.PeerConnection
 import org.webrtc.PeerConnectionFactory
 import org.webrtc.SdpObserver
 import org.webrtc.SessionDescription
+import java.nio.ByteBuffer
 
-class RemoteDevice(private val context: Context) {
+class RemoteDevice(private val context: Context) : RemoteDeviceApi {
+
+    private val _isConnected = MutableStateFlow(false)
+    override val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
+
+    private val _dataReceiver = MutableSharedFlow<ByteArray>(extraBufferCapacity = Int.MAX_VALUE)
+    override val dataReceiver: SharedFlow<ByteArray> = _dataReceiver.asSharedFlow()
 
     private var peerConnection: PeerConnection? = null
     private var dataChannel: DataChannel? = null
@@ -31,6 +44,7 @@ class RemoteDevice(private val context: Context) {
 
         override fun onIceConnectionChange(state: PeerConnection.IceConnectionState?) {
             li("on ice connection change invoked $state")
+            _isConnected.tryEmit(state == PeerConnection.IceConnectionState.CONNECTED)
         }
 
         override fun onIceConnectionReceivingChange(receiving: Boolean) {
@@ -75,11 +89,14 @@ class RemoteDevice(private val context: Context) {
         }
 
         override fun onStateChange() {
-            li("Data channel state changed")
+            li("Data channel state changed ")
         }
 
         override fun onMessage(buffer: DataChannel.Buffer?) {
-            printReceivedData(buffer)
+            val byteBuffer = buffer?.data ?: return
+            val bytes = ByteArray(byteBuffer.remaining())
+            byteBuffer.get(bytes)
+            _dataReceiver.tryEmit(bytes)
         }
     }
 
@@ -113,22 +130,6 @@ class RemoteDevice(private val context: Context) {
                 .createInitializationOptions()
         )
         return PeerConnectionFactory.builder().setOptions(options).createPeerConnectionFactory()
-    }
-
-    private fun printReceivedData(buffer: DataChannel.Buffer?) {
-        try {
-            buffer?.let {
-                val byteBuffer = it.data
-                val bytes =
-                    ByteArray(byteBuffer.remaining()) // Allocate a byte array of appropriate size
-                byteBuffer.get(bytes) // Copy the data from the ByteBuffer to the byte array
-                val data = String(bytes) // Convert the byte array to a String
-                li("Received message: $data")
-            }
-        } catch (e: Exception) {
-            li("Some error happened: ${e.message}")
-            e.printStackTrace()
-        }
     }
 
     fun createOffer() = callbackFlow<String?> {
@@ -244,5 +245,12 @@ class RemoteDevice(private val context: Context) {
 
     fun handleCandidates(candidates: List<IceCandidate>) {
         candidates.forEach { peerConnection?.addIceCandidate(it) }
+    }
+
+    override suspend fun sendData(byteArray: ByteArray): Boolean {
+        return withContext(Dispatchers.IO) {
+            val buffer = DataChannel.Buffer(ByteBuffer.wrap(byteArray), true)
+            dataChannel?.send(buffer) == true
+        }
     }
 }
