@@ -25,8 +25,12 @@ class RoomPicker(private val mediator: ConnectionMediator) {
             }
 
             override fun onComplete(e: DatabaseError?, status: Boolean, s: DataSnapshot?) {
-                val sendValue = if (s?.value == null && status) partnerInfo else null
-                trySend(sendValue)
+                val retValue = when {
+                    s?.value != null && status && e == null -> myRoomId
+                    s?.value == null && status && e == null -> partnerInfo
+                    else -> null
+                }
+                trySend(retValue)
                 close()
             }
         }
