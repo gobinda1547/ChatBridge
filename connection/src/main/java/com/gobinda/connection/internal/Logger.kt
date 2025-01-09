@@ -4,18 +4,18 @@ import android.util.Log
 
 private const val LOG_TAG = "web_rtc_conn"
 
-fun li(message: String) {
+internal fun li(message: String) {
     Log.i(LOG_TAG, message)
 }
 
-fun li(tag: String, message: String) {
+internal fun li(tag: String, message: String) {
     Log.i(tag + LOG_TAG, message)
 }
 
-fun le(message: String) {
+internal fun le(message: String) {
     Log.e(LOG_TAG, message)
 }
 
-fun le(tag: String, message: String) {
+internal fun le(tag: String, message: String) {
     Log.e(tag + LOG_TAG, message)
 }

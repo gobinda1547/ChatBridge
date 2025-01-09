@@ -25,6 +25,7 @@ class GameViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             logI("collecting remote device")
             val remoteDevice = remoteConnector.connect()
+
             delay(100000)
         }
     }

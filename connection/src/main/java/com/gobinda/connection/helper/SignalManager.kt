@@ -5,7 +5,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import org.webrtc.IceCandidate
 
-class SignalManager(database: FirebaseDatabase) {
+internal class SignalManager(database: FirebaseDatabase) {
 
     private val parentRoomRef: DatabaseReference = database.getReference("rooms")
 

@@ -22,7 +22,7 @@ class RemoteDevice(private val context: Context) {
     private var dataChannel: DataChannel? = null
 
     private val _iceCandidates = MutableStateFlow<List<IceCandidate>>(emptyList())
-    val iceCandidates = _iceCandidates.asStateFlow()
+    internal val iceCandidates = _iceCandidates.asStateFlow()
 
     private val connectionObserver = object : PeerConnection.Observer {
         override fun onSignalingChange(state: PeerConnection.SignalingState?) {

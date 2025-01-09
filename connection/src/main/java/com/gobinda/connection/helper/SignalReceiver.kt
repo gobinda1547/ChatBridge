@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import org.webrtc.*
 import kotlin.collections.get
 
-class SignalReceiver(private val parentRoomRef: DatabaseReference) {
+internal class SignalReceiver(private val parentRoomRef: DatabaseReference) {
 
     fun receiveOffer(fromRoom: String, timeout: Long) = callbackFlow<String?> {
         val currentJob = launch {

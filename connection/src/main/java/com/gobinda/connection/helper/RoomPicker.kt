@@ -11,7 +11,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 
-class RoomPicker(database: FirebaseDatabase) {
+internal class RoomPicker(database: FirebaseDatabase) {
 
     private val waitingRoomRef: DatabaseReference = database.getReference("waiting")
 
@@ -47,15 +47,4 @@ class RoomPicker(database: FirebaseDatabase) {
         waitingRoomRef.runTransaction(transaction)
         awaitClose { currentJob.cancel() }
     }
-
-    private fun convertDataToStringList(data: Any?): MutableList<String> {
-        val inputList = data as? List<*> ?: return mutableListOf()
-        return inputList.mapNotNull { it as? String }.toMutableList()
-    }
-
-    private data class SharedInfo(
-        val myRoomId: String,
-        val myTimeStamp: Long
-    )
-
 }

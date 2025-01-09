@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import org.webrtc.IceCandidate
 
-class SignalSender(private val parentRoomRef: DatabaseReference) {
+internal class SignalSender(private val parentRoomRef: DatabaseReference) {
 
     fun sendOffer(toRoom: String, offerSdp: String, timeout: Long) = callbackFlow<Boolean> {
         val currentJob = launch {
