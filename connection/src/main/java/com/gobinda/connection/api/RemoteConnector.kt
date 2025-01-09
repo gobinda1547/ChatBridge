@@ -47,27 +47,36 @@ class RemoteConnector(private val context: Context) {
         val myRole = ConnectionRole.Leader
         val remoteDevice = RemoteDevice(context).initialize()
 
+        li("creating offer")
         val offerSdp = remoteDevice.createOffer().firstOrNull() ?: let {
             le("offer creation failed")
             return null // since offer creation failed
         }
+
+        li("sending offer")
         if (!signalManager.sendOffer(partnerRoomId, offerSdp, SEND_OFFER_TIMEOUT).first()) {
             le("offer sending failed")
             return null // since offer sending failed
         }
 
+        li("receiving answer")
         val receivedAnswer =
             signalManager.receiveAnswer(partnerRoomId, RECEIVE_ANSWER_TIMEOUT).first() ?: let {
                 le("no answer received")
                 return null // since no answer received
             }
+
+        li("handlign answer")
         if (remoteDevice.handleAnswer(receivedAnswer).firstOrNull() != true) {
             le("answer could not handled")
             return null // since answer couldn't be handled
         }
 
+        li("generating ice candidates")
         delay(ICE_CANDIDATES_GENERATE_TIMEOUT) // for generating all the ice candidates within 2 seconds
         val myCandidates = remoteDevice.iceCandidates.value
+
+        li("sending ice candidates")
         if (signalManager.sendIceCandidates(partnerRoomId, myRole, myCandidates, SEND_ICE_TIMEOUT)
                 .firstOrNull() != true
         ) {
@@ -75,6 +84,7 @@ class RemoteConnector(private val context: Context) {
             return null // since couldn't send ice candidates
         }
 
+        li("receiving ice candidates")
         val receivedCandidates =
             signalManager.receiveIceCandidates(partnerRoomId, myRole, RECEIVE_ICE_TIMEOUT)
                 .firstOrNull()
@@ -82,6 +92,7 @@ class RemoteConnector(private val context: Context) {
             le("no candidates received from remote side")
             return null // since no candidates found
         }
+        li("handle received ice candidates")
         remoteDevice.handleCandidates(receivedCandidates)
 
         return remoteDevice
@@ -91,20 +102,26 @@ class RemoteConnector(private val context: Context) {
         val myRole = ConnectionRole.Child
         val remoteDevice = RemoteDevice(context).initialize()
 
+        li("receiving offer")
         val receivedOffer =
             signalManager.receiveOffer(myRoomId, RECEIVE_OFFER_TIMEOUT).firstOrNull() ?: let {
                 le("offer not received")
                 return null // since offer not received
             }
+
+        li("handle received offer")
         if (remoteDevice.handleOffer(receivedOffer).firstOrNull() != true) {
             le("could not handled received offer")
             return null // since we couldn't handle received offer
         }
 
+        li("create answer")
         val answerSdp = remoteDevice.createAnswer().firstOrNull() ?: let {
             le("could not create answer")
             return null // since couldn't create answer
         }
+
+        li("send answer")
         if (signalManager.sendAnswer(myRoomId, answerSdp, SEND_ANSWER_TIMEOUT)
                 .firstOrNull() != true
         ) {
@@ -112,8 +129,11 @@ class RemoteConnector(private val context: Context) {
             return null // since couldn't send answer
         }
 
+        li("generating ice candidates")
         delay(ICE_CANDIDATES_GENERATE_TIMEOUT) // for generating all the ice candidates within 2 seconds
         val myCandidates = remoteDevice.iceCandidates.value
+
+        li("sending ice candidates")
         if (signalManager.sendIceCandidates(myRoomId, myRole, myCandidates, SEND_ICE_TIMEOUT)
                 .firstOrNull() != true
         ) {
@@ -121,12 +141,15 @@ class RemoteConnector(private val context: Context) {
             return null // since couldn't send ice candidates
         }
 
+        li("receiving ice candidates")
         val receivedCandidates =
             signalManager.receiveIceCandidates(myRoomId, myRole, RECEIVE_ICE_TIMEOUT).firstOrNull()
         if (receivedCandidates == null || receivedCandidates.isEmpty()) {
             le("no candidates found from remote")
             return null // since no candidates found
         }
+
+        li("handle received ice candidates")
         remoteDevice.handleCandidates(receivedCandidates)
 
         return remoteDevice
