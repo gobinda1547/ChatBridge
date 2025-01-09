@@ -1,6 +1,6 @@
 package com.gobinda.connection.signal
 
-import com.gobinda.connection.ConnectionMediator
+import com.gobinda.connection.api.ConnectionMediator
 import com.gobinda.connection.api.ConnectionRole
 import com.gobinda.connection.log.le
 import com.google.firebase.database.*

@@ -1,6 +1,6 @@
 package com.gobinda.connection.picker
 
-import com.gobinda.connection.ConnectionMediator
+import com.gobinda.connection.api.ConnectionMediator
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.MutableData
