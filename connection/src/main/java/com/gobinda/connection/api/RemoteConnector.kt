@@ -2,13 +2,13 @@ package com.gobinda.connection.api
 
 import android.content.Context
 import com.gobinda.connection.helper.IceCollector
-import com.gobinda.connection.internal.ConnectionRole
-import com.gobinda.connection.internal.li
 import com.gobinda.connection.helper.RoomPicker
 import com.gobinda.connection.helper.SignalManager
+import com.gobinda.connection.helper.confirmConnectionOrWait
+import com.gobinda.connection.internal.ConnectionRole
 import com.gobinda.connection.internal.le
+import com.gobinda.connection.internal.li
 import com.google.firebase.database.FirebaseDatabase
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 
@@ -23,6 +23,7 @@ class RemoteConnector(private val context: Context) {
         private const val SEND_ICE_TIMEOUT = 5000L
         private const val RECEIVE_ICE_TIMEOUT = 5000L
         private const val ICE_CANDIDATES_GENERATE_TIMEOUT = 5000L
+        private const val CONNECTION_CONFIRMATION_TIMEOUT = 5000L
     }
 
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
@@ -104,6 +105,11 @@ class RemoteConnector(private val context: Context) {
         li("handle received ice candidates")
         remoteDevice.handleCandidates(receivedCandidates)
 
+        if (!confirmConnectionOrWait(remoteDevice, CONNECTION_CONFIRMATION_TIMEOUT).first()) {
+            le("could not confirm connection on time")
+            return null // since no candidates found
+        }
+
         return remoteDevice
     }
 
@@ -167,6 +173,11 @@ class RemoteConnector(private val context: Context) {
 
         li("handle received ice candidates")
         remoteDevice.handleCandidates(receivedCandidates)
+
+        if (!confirmConnectionOrWait(remoteDevice, CONNECTION_CONFIRMATION_TIMEOUT).first()) {
+            le("could not confirm connection on time")
+            return null // since no candidates found
+        }
 
         return remoteDevice
     }
