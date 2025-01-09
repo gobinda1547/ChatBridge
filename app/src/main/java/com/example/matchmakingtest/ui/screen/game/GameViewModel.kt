@@ -24,7 +24,9 @@ class GameViewModel @Inject constructor(
     fun handleConnect() {
         viewModelScope.launch(Dispatchers.IO) {
             logI("collecting remote device")
-            val remoteDevice = remoteConnector.connect()
+            remoteConnector.connect()?.isConnected?.collect {
+                logI("connection state changed in viewmodel : $it")
+            }
 
             delay(100000)
         }
