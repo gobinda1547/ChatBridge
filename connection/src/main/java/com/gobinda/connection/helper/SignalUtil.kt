@@ -1,6 +1,6 @@
-package com.gobinda.connection.signal
+package com.gobinda.connection.helper
 
-import com.gobinda.connection.api.ConnectionRole
+import com.gobinda.connection.internal.ConnectionRole
 
 private const val ICE_CANDIDATE_DB_PREFIX = "ice_"
 

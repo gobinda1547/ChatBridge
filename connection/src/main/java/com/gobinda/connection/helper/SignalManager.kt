@@ -1,6 +1,6 @@
-package com.gobinda.connection.signal
+package com.gobinda.connection.helper
 
-import com.gobinda.connection.api.ConnectionRole
+import com.gobinda.connection.internal.ConnectionRole
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import org.webrtc.IceCandidate

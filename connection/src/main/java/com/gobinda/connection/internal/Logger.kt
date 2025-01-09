@@ -1,4 +1,4 @@
-package com.gobinda.connection.log
+package com.gobinda.connection.internal
 
 import android.util.Log
 

@@ -1,4 +1,4 @@
-package com.gobinda.connection.api
+package com.gobinda.connection.internal
 
 sealed class ConnectionRole(val key: String) {
     data object Leader : ConnectionRole("leader")

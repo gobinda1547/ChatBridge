@@ -1,6 +1,6 @@
-package com.gobinda.connection.signal
+package com.gobinda.connection.helper
 
-import com.gobinda.connection.api.ConnectionRole
+import com.gobinda.connection.internal.ConnectionRole
 import com.google.firebase.database.DatabaseReference
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow

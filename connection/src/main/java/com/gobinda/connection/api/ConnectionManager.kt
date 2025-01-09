@@ -1,10 +1,10 @@
 package com.gobinda.connection.api
 
 import android.content.Context
-import com.gobinda.connection.connector.RemoteDevice
-import com.gobinda.connection.log.li
-import com.gobinda.connection.picker.RoomPicker
-import com.gobinda.connection.signal.SignalManager
+import com.gobinda.connection.internal.ConnectionRole
+import com.gobinda.connection.internal.li
+import com.gobinda.connection.helper.RoomPicker
+import com.gobinda.connection.helper.SignalManager
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull

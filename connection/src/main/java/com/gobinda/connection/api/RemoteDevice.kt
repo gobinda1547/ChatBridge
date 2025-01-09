@@ -1,7 +1,7 @@
-package com.gobinda.connection.connector
+package com.gobinda.connection.api
 
 import android.content.Context
-import com.gobinda.connection.log.li
+import com.gobinda.connection.internal.li
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
