@@ -2,15 +2,19 @@ package com.gobinda.connection.api
 
 import android.content.Context
 import com.gobinda.connection.internal.li
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import org.webrtc.DataChannel
@@ -25,9 +29,6 @@ import java.nio.ByteBuffer
 
 class RemoteDevice(private val context: Context) : RemoteDeviceApi {
 
-    private val _isConnected = MutableStateFlow(false)
-    override val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()
-
     private val _dataReceiver = MutableSharedFlow<ByteArray>(extraBufferCapacity = Int.MAX_VALUE)
     override val dataReceiver: SharedFlow<ByteArray> = _dataReceiver.asSharedFlow()
 
@@ -37,6 +38,18 @@ class RemoteDevice(private val context: Context) : RemoteDeviceApi {
     private val _iceCandidates = MutableStateFlow<List<IceCandidate>>(emptyList())
     internal val iceCandidates = _iceCandidates.asStateFlow()
 
+    private val _channelState = MutableStateFlow(false)
+    private val _iceConnState = MutableStateFlow<PeerConnection.IceConnectionState?>(null)
+
+    override val isConnected: StateFlow<Boolean> =
+        combine(_channelState, _iceConnState) { channelState, iceConnState ->
+            channelState && iceConnState == PeerConnection.IceConnectionState.CONNECTED
+        }.stateIn(
+            scope = CoroutineScope(Dispatchers.Default), // Provide a coroutine scope
+            started = SharingStarted.WhileSubscribed(5000), // Active while there are active subscribers
+            initialValue = false // Initial value
+        )
+
     private val connectionObserver = object : PeerConnection.Observer {
         override fun onSignalingChange(state: PeerConnection.SignalingState?) {
             li("on signaling changed $state")
@@ -44,7 +57,7 @@ class RemoteDevice(private val context: Context) : RemoteDeviceApi {
 
         override fun onIceConnectionChange(state: PeerConnection.IceConnectionState?) {
             li("on ice connection change invoked $state")
-            _isConnected.tryEmit(state == PeerConnection.IceConnectionState.CONNECTED)
+            _iceConnState.tryEmit(state)
         }
 
         override fun onIceConnectionReceivingChange(receiving: Boolean) {
@@ -76,6 +89,7 @@ class RemoteDevice(private val context: Context) : RemoteDeviceApi {
 
         override fun onDataChannel(channel: DataChannel?) {
             li("on data channel invoked")
+            _channelState.tryEmit(channel != null)
         }
 
         override fun onRenegotiationNeeded() {

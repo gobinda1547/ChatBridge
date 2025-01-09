@@ -1,6 +1,7 @@
 package com.gobinda.connection.api
 
 import android.content.Context
+import com.gobinda.connection.helper.IceCollector
 import com.gobinda.connection.internal.ConnectionRole
 import com.gobinda.connection.internal.li
 import com.gobinda.connection.helper.RoomPicker
@@ -18,7 +19,7 @@ class RemoteConnector(private val context: Context) {
         private const val SEND_OFFER_TIMEOUT = 5000L
         private const val RECEIVE_OFFER_TIMEOUT = 20000L
         private const val SEND_ANSWER_TIMEOUT = 5000L
-        private const val RECEIVE_ANSWER_TIMEOUT = 5000L
+        private const val RECEIVE_ANSWER_TIMEOUT = 10000L
         private const val SEND_ICE_TIMEOUT = 5000L
         private const val RECEIVE_ICE_TIMEOUT = 5000L
         private const val ICE_CANDIDATES_GENERATE_TIMEOUT = 5000L
@@ -28,6 +29,7 @@ class RemoteConnector(private val context: Context) {
 
     private val signalManager = SignalManager(database)
     private val roomPicker = RoomPicker(database)
+    private val iceCollector = IceCollector()
 
     suspend fun connect(): RemoteDeviceApi? {
         val myRoomId = System.currentTimeMillis().toString()
@@ -73,8 +75,15 @@ class RemoteConnector(private val context: Context) {
         }
 
         li("generating ice candidates")
-        delay(ICE_CANDIDATES_GENERATE_TIMEOUT) // for generating all the ice candidates within 2 seconds
-        val myCandidates = remoteDevice.iceCandidates.value
+        val myCandidates = iceCollector.collectCandidates(
+            remoteDevice.iceCandidates,
+            ICE_CANDIDATES_GENERATE_TIMEOUT
+        ).first()
+
+        if (myCandidates.isEmpty()) {
+            le("could not find any ice candidate on my side")
+            return null // since my candidate lists is empty
+        }
 
         li("sending ice candidates")
         if (signalManager.sendIceCandidates(partnerRoomId, myRole, myCandidates, SEND_ICE_TIMEOUT)
@@ -130,8 +139,15 @@ class RemoteConnector(private val context: Context) {
         }
 
         li("generating ice candidates")
-        delay(ICE_CANDIDATES_GENERATE_TIMEOUT) // for generating all the ice candidates within 2 seconds
-        val myCandidates = remoteDevice.iceCandidates.value
+        val myCandidates = iceCollector.collectCandidates(
+            remoteDevice.iceCandidates,
+            ICE_CANDIDATES_GENERATE_TIMEOUT
+        ).first()
+
+        if (myCandidates.isEmpty()) {
+            le("could not find any ice candidate on my side")
+            return null // since my candidate lists is empty
+        }
 
         li("sending ice candidates")
         if (signalManager.sendIceCandidates(myRoomId, myRole, myCandidates, SEND_ICE_TIMEOUT)
