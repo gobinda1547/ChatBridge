@@ -5,6 +5,7 @@ import com.gobinda.connection.internal.ConnectionRole
 import com.gobinda.connection.internal.li
 import com.gobinda.connection.helper.RoomPicker
 import com.gobinda.connection.helper.SignalManager
+import com.gobinda.connection.internal.le
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
@@ -35,16 +36,20 @@ class ConnectionManager(private val context: Context) {
         val remoteDevice = RemoteDevice(context).initialize()
 
         val offerSdp = remoteDevice.createOffer().firstOrNull() ?: let {
+            le("offer creation failed")
             return null // since offer creation failed
         }
         if (signalManager.sendOffer(partnerRoomId, offerSdp).firstOrNull() != true) {
+            le("offer sending failed")
             return null // since offer sending failed
         }
 
         val receivedAnswer = signalManager.receiveAnswer(partnerRoomId).firstOrNull() ?: let {
+            le("no answer received")
             return null // since no answer received
         }
         if (remoteDevice.handleAnswer(receivedAnswer).firstOrNull() != true) {
+            le("answer could not handled")
             return null // since answer couldn't be handled
         }
 
@@ -53,12 +58,14 @@ class ConnectionManager(private val context: Context) {
         if (signalManager.sendIceCandidates(partnerRoomId, myRole, myCandidates)
                 .firstOrNull() != true
         ) {
+            le("could not send ice candidates")
             return null // since couldn't send ice candidates
         }
 
         val receivedCandidates =
             signalManager.receiveIceCandidates(partnerRoomId, myRole).firstOrNull()
         if (receivedCandidates == null || receivedCandidates.isEmpty()) {
+            le("no candidates received from remote side")
             return null // since no candidates found
         }
         remoteDevice.handleCandidates(receivedCandidates)
@@ -71,27 +78,33 @@ class ConnectionManager(private val context: Context) {
         val remoteDevice = RemoteDevice(context).initialize()
 
         val receivedOffer = signalManager.receiveOffer(myRoomId).firstOrNull() ?: let {
+            le("offer not received")
             return null // since offer not received
         }
         if (remoteDevice.handleOffer(receivedOffer).firstOrNull() != true) {
+            le("could not handled received offer")
             return null // since we couldn't handle received offer
         }
 
         val answerSdp = remoteDevice.createAnswer().firstOrNull() ?: let {
+            le("could not create answer")
             return null // since couldn't create answer
         }
         if (signalManager.sendAnswer(myRoomId, answerSdp).firstOrNull() != true) {
+            le("could not send answer")
             return null // since couldn't send answer
         }
 
         delay(2000) // for generating all the ice candidates within 2 seconds
         val myCandidates = remoteDevice.iceCandidates.value
         if (signalManager.sendIceCandidates(myRoomId, myRole, myCandidates).firstOrNull() != true) {
+            le("couldn't send ice candidates")
             return null // since couldn't send ice candidates
         }
 
         val receivedCandidates = signalManager.receiveIceCandidates(myRoomId, myRole).firstOrNull()
         if (receivedCandidates == null || receivedCandidates.isEmpty()) {
+            le("no candidates found from remote")
             return null // since no candidates found
         }
         remoteDevice.handleCandidates(receivedCandidates)
