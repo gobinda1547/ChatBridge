@@ -14,14 +14,14 @@ import kotlinx.coroutines.flow.firstOrNull
 class RemoteConnector(private val context: Context) {
 
     companion object {
-        private const val PICK_ROOM_TIMEOUT = 20000L
-        private const val SEND_OFFER_TIMEOUT = 20000L
+        private const val PICK_ROOM_TIMEOUT = 5000L
+        private const val SEND_OFFER_TIMEOUT = 5000L
         private const val RECEIVE_OFFER_TIMEOUT = 20000L
-        private const val SEND_ANSWER_TIMEOUT = 20000L
-        private const val RECEIVE_ANSWER_TIMEOUT = 20000L
-        private const val SEND_ICE_TIMEOUT = 20000L
-        private const val RECEIVE_ICE_TIMEOUT = 20000L
-        private const val ICE_CANDIDATES_GENERATE_TIMEOUT = 20000L
+        private const val SEND_ANSWER_TIMEOUT = 5000L
+        private const val RECEIVE_ANSWER_TIMEOUT = 5000L
+        private const val SEND_ICE_TIMEOUT = 5000L
+        private const val RECEIVE_ICE_TIMEOUT = 5000L
+        private const val ICE_CANDIDATES_GENERATE_TIMEOUT = 5000L
     }
 
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()

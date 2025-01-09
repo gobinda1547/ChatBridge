@@ -42,7 +42,10 @@ class RemoteDevice(private val context: Context) {
         }
 
         override fun onIceCandidate(candidate: IceCandidate?) {
-            candidate?.let { current -> _iceCandidates.update { it + current } }
+            candidate?.let { current ->
+                li("on ice candidate")
+                _iceCandidates.update { it + current }
+            }
         }
 
         override fun onIceCandidatesRemoved(candidates: Array<out IceCandidate>?) {
