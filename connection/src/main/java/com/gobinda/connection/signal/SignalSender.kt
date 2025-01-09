@@ -1,15 +1,15 @@
 package com.gobinda.connection.signal
 
-import com.gobinda.connection.api.ConnectionMediator
 import com.gobinda.connection.api.ConnectionRole
+import com.google.firebase.database.DatabaseReference
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import org.webrtc.IceCandidate
 
-class SignalSender(private val mediator: ConnectionMediator) {
+class SignalSender(private val parentRoomRef: DatabaseReference) {
 
     fun sendOffer(toRoom: String, offerSdp: String) = callbackFlow<Boolean> {
-        mediator.parentRoomRef.child(toRoom).child("offer").setValue(offerSdp)
+        parentRoomRef.child(toRoom).child("offer").setValue(offerSdp)
             .addOnCompleteListener { task ->
                 trySend(task.isSuccessful)
                 close()
@@ -18,7 +18,7 @@ class SignalSender(private val mediator: ConnectionMediator) {
     }
 
     fun sendAnswer(toRoom: String, answerSdp: String) = callbackFlow<Boolean> {
-        mediator.parentRoomRef.child(toRoom).child("answer").setValue(answerSdp)
+        parentRoomRef.child(toRoom).child("answer").setValue(answerSdp)
             .addOnCompleteListener { task ->
                 trySend(task.isSuccessful)
                 close()
@@ -26,7 +26,7 @@ class SignalSender(private val mediator: ConnectionMediator) {
         awaitClose()
     }
 
-    fun sendIceCandidate(
+    fun sendIceCandidates(
         toRoom: String,
         myRole: ConnectionRole,
         candidates: List<IceCandidate>
@@ -47,7 +47,7 @@ class SignalSender(private val mediator: ConnectionMediator) {
             )
         }
 
-        mediator.parentRoomRef.child(toRoom).child(icePath).setValue(candidateMapList)
+        parentRoomRef.child(toRoom).child(icePath).setValue(candidateMapList)
             .addOnCompleteListener { task ->
                 trySend(task.isSuccessful)
                 close()

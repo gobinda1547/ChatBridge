@@ -1,6 +1,5 @@
 package com.gobinda.connection.signal
 
-import com.gobinda.connection.api.ConnectionMediator
 import com.gobinda.connection.api.ConnectionRole
 import com.gobinda.connection.log.le
 import com.google.firebase.database.*
@@ -9,10 +8,10 @@ import kotlinx.coroutines.flow.callbackFlow
 import org.webrtc.*
 import kotlin.collections.get
 
-class SignalReceiver(private val mediator: ConnectionMediator) {
+class SignalReceiver(private val parentRoomRef: DatabaseReference) {
 
     fun receiveOffer(fromRoom: String) = callbackFlow<String?> {
-        val offerDataReference = mediator.parentRoomRef.child(fromRoom).child("offer")
+        val offerDataReference = parentRoomRef.child(fromRoom).child("offer")
         val offerListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists() == false) return
@@ -37,7 +36,7 @@ class SignalReceiver(private val mediator: ConnectionMediator) {
     }
 
     fun receiveAnswer(fromRoom: String) = callbackFlow<String?> {
-        val answerDataReference = mediator.parentRoomRef.child(fromRoom).child("answer")
+        val answerDataReference = parentRoomRef.child(fromRoom).child("answer")
         val answerListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists() == false) return
@@ -61,12 +60,12 @@ class SignalReceiver(private val mediator: ConnectionMediator) {
         awaitClose { answerDataReference.removeEventListener(answerListener) }
     }
 
-    fun receiveIceCandidate(
+    fun receiveIceCandidates(
         fromRoom: String,
         myRole: ConnectionRole
     ) = callbackFlow<List<IceCandidate>?> {
         val icePath = fromWhereToReceiveIceCandidates(myRole)
-        val candidateDataReference = mediator.parentRoomRef.child(fromRoom).child(icePath)
+        val candidateDataReference = parentRoomRef.child(fromRoom).child(icePath)
         val candidateListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists() == false) return
@@ -75,7 +74,7 @@ class SignalReceiver(private val mediator: ConnectionMediator) {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                le("receiveIceCandidate: found database error ${error.message}")
+                le("receiveIceCandidates: found database error ${error.message}")
                 trySend(null)
                 close()
             }

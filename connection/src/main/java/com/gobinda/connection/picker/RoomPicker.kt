@@ -1,14 +1,17 @@
 package com.gobinda.connection.picker
 
-import com.gobinda.connection.api.ConnectionMediator
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.MutableData
 import com.google.firebase.database.Transaction
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 
-class RoomPicker(private val mediator: ConnectionMediator) {
+class RoomPicker(database: FirebaseDatabase) {
+
+    private val waitingRoomRef: DatabaseReference = database.getReference("waiting")
 
     fun pickOrWait(myRoomId: String) = callbackFlow<String?> {
         val transaction = object : Transaction.Handler {
@@ -34,7 +37,7 @@ class RoomPicker(private val mediator: ConnectionMediator) {
                 close()
             }
         }
-        mediator.waitingRoomRef.runTransaction(transaction)
+        waitingRoomRef.runTransaction(transaction)
         awaitClose()
     }
 
