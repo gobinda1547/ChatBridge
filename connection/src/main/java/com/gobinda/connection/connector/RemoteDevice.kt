@@ -2,14 +2,19 @@ package com.gobinda.connection.connector
 
 import android.content.Context
 import com.gobinda.connection.log.li
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.update
 import org.webrtc.DataChannel
 import org.webrtc.IceCandidate
+import org.webrtc.MediaConstraints
 import org.webrtc.MediaStream
 import org.webrtc.PeerConnection
 import org.webrtc.PeerConnectionFactory
+import org.webrtc.SdpObserver
+import org.webrtc.SessionDescription
 
 class RemoteDevice(private val context: Context) {
 
@@ -123,5 +128,118 @@ class RemoteDevice(private val context: Context) {
         }
     }
 
+    fun createOffer() = callbackFlow<String?> {
+        val currentConnection: PeerConnection = peerConnection ?: let {
+            trySend(null)
+            close()
+            return@callbackFlow
+        }
+        currentConnection.createOffer(object : SdpObserver {
+            override fun onCreateSuccess(sdp: SessionDescription) {
+                currentConnection.setLocalDescription(object : SdpObserver {
+                    override fun onCreateSuccess(p0: SessionDescription?) {}
+                    override fun onCreateFailure(p0: String?) {}
+                    override fun onSetSuccess() {
+                        trySend(sdp.description)
+                        close()
+                    }
 
+                    override fun onSetFailure(p0: String?) {
+                        trySend(null)
+                        close()
+                    }
+                }, sdp)
+            }
+
+            override fun onCreateFailure(error: String?) {
+                trySend(null)
+                close()
+            }
+
+            override fun onSetFailure(error: String?) {}
+            override fun onSetSuccess() {}
+        }, MediaConstraints())
+        awaitClose()
+    }
+
+    fun createAnswer() = callbackFlow<String?> {
+        val currentConnection: PeerConnection = peerConnection ?: let {
+            trySend(null)
+            close()
+            return@callbackFlow
+        }
+        currentConnection.createAnswer(object : SdpObserver {
+            override fun onSetFailure(error: String?) {}
+            override fun onSetSuccess() {}
+            override fun onCreateSuccess(sdp: SessionDescription) {
+                currentConnection.setLocalDescription(object : SdpObserver {
+                    override fun onCreateSuccess(p0: SessionDescription?) {}
+                    override fun onCreateFailure(p0: String?) {}
+                    override fun onSetSuccess() {
+                        trySend(sdp.description)
+                        close()
+                    }
+
+                    override fun onSetFailure(p0: String?) {
+                        trySend(null)
+                        close()
+                    }
+                }, sdp)
+            }
+
+            override fun onCreateFailure(error: String?) {
+                trySend(null)
+                close()
+            }
+        }, MediaConstraints())
+        awaitClose()
+    }
+
+    fun handleOffer(offerSdp: String) = callbackFlow<Boolean> {
+        val currentConnection: PeerConnection = peerConnection ?: let {
+            trySend(false)
+            close()
+            return@callbackFlow
+        }
+        currentConnection.setRemoteDescription(object : SdpObserver {
+            override fun onCreateSuccess(p0: SessionDescription?) {}
+            override fun onCreateFailure(error: String?) {}
+            override fun onSetSuccess() {
+                trySend(true)
+                close()
+            }
+
+            override fun onSetFailure(error: String?) {
+                trySend(false)
+                close()
+            }
+        }, SessionDescription(SessionDescription.Type.OFFER, offerSdp))
+        awaitClose()
+    }
+
+    fun handleAnswer(answerSdp: String) = callbackFlow<Boolean> {
+        val currentConnection: PeerConnection = peerConnection ?: let {
+            trySend(false)
+            close()
+            return@callbackFlow
+        }
+        currentConnection.setRemoteDescription(object : SdpObserver {
+            override fun onCreateSuccess(sdp: SessionDescription?) {}
+            override fun onCreateFailure(error: String?) {}
+            override fun onSetSuccess() {
+                trySend(true)
+                close()
+            }
+
+            override fun onSetFailure(error: String?) {
+                trySend(false)
+                close()
+            }
+        }, SessionDescription(SessionDescription.Type.ANSWER, answerSdp))
+        awaitClose()
+    }
+
+    fun handleCandidates(candidates: List<IceCandidate>) {
+        candidates.forEach { peerConnection?.addIceCandidate(it) }
+    }
 }

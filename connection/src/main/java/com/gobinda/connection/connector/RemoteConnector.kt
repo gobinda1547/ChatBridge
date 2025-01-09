@@ -1,6 +1,7 @@
 package com.gobinda.connection.connector
 
 import com.gobinda.connection.api.ConnectionMediator
+import com.gobinda.connection.api.ConnectionRole
 import com.gobinda.connection.log.li
 import kotlinx.coroutines.flow.firstOrNull
 
@@ -11,37 +12,57 @@ class RemoteConnector(private val mediator: ConnectionMediator) {
         val receivedRoomId = mediator.pickRoomOrWaitInQueue(myPreferredRoomId).firstOrNull()
         li("myPrefRoom: [$myPreferredRoomId], received: [$receivedRoomId]")
 
-        if (receivedRoomId == null) {
-            // since partner not found and also my information upload failed
-            // we will return indicating that connection not possible
-            // the caller may try again, that's up to upper layer
-            return null
+        return when (receivedRoomId) {
+            null -> null
+            myPreferredRoomId -> handleAfterJoiningWaitingList(myPreferredRoomId)
+            else -> handleAfterPartnerRoomFound(receivedRoomId)
         }
-        if (receivedRoomId == myPreferredRoomId) {
-            // that means we are in the waiting list
-            // so we will wait for the offer from a leader
-            return handleAfterJoiningWaitingList(myPreferredRoomId)
-        }
-        // since above cases are failed that means I am a leader now
-        // and the room id I have received contains my partner or child's room id
-        return handleAfterPartnerRoomFound(receivedRoomId)
     }
 
     private suspend fun handleAfterPartnerRoomFound(partnerRoomId: String): RemoteDevice? {
-        return null
+        val myRole = ConnectionRole.Leader
+        val remoteDevice = mediator.createRemoteDevice()
+        val offerSdp = remoteDevice.createOffer().firstOrNull() ?: let {
+            return null // since offer creation failed
+        }
+        if (mediator.sendOffer(partnerRoomId, offerSdp).firstOrNull() != true) {
+            return null // since offer sending failed
+        }
+        val receivedAnswer = mediator.receiveAnswer(partnerRoomId).firstOrNull() ?: let {
+            return null // since no answer received
+        }
+        if (remoteDevice.handleAnswer(receivedAnswer).firstOrNull() != true) {
+            return null // since answer couldn't be handled
+        }
+        val candidates = mediator.receiveIceCandidates(partnerRoomId, myRole).firstOrNull()
+        if (candidates == null || candidates.isEmpty()) {
+            return null // since no candidates found
+        }
+        remoteDevice.handleCandidates(candidates)
+        return remoteDevice
     }
 
-    private suspend fun handleAfterJoiningWaitingList(myPreferredRoomId: String): RemoteDevice? {
-        val receivedOffer = mediator.receiveOffer(myPreferredRoomId).firstOrNull()
-        li("received offer: [$receivedOffer]")
-
-        if (receivedOffer == null) {
-            // since we couldn't receive any offer so connection is not possible
-            // returning null indicating that new connection
-            return null
+    private suspend fun handleAfterJoiningWaitingList(myRoomId: String): RemoteDevice? {
+        val myRole = ConnectionRole.Child
+        val remoteDevice = mediator.createRemoteDevice()
+        val receivedOffer = mediator.receiveOffer(myRoomId).firstOrNull() ?: let {
+            return null // since offer not received
         }
-
-        mediator.send
+        if (remoteDevice.handleOffer(receivedOffer).firstOrNull() != true) {
+            return null // since we couldn't handle received offer
+        }
+        val answerSdp = remoteDevice.createAnswer().firstOrNull() ?: let {
+            return null // since couldn't create answer
+        }
+        if (mediator.sendAnswer(myRoomId, answerSdp).firstOrNull() != true) {
+            return null // since couldn't send answer
+        }
+        val candidates = mediator.receiveIceCandidates(myRoomId, myRole).firstOrNull()
+        if (candidates == null || candidates.isEmpty()) {
+            return null // since no candidates found
+        }
+        remoteDevice.handleCandidates(candidates)
+        return remoteDevice
     }
 
 
