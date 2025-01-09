@@ -29,7 +29,7 @@ fun GameScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                onClick = { viewModel.handleSendOffer() }
+                onClick = { viewModel.handleConnect() }
             ) {
                 Text("Send offer")
             }
@@ -37,7 +37,7 @@ fun GameScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                onClick = { viewModel.waitAndSee() }
+                onClick = { viewModel.handleConnect() }
             ) {
                 Text("Wait and see")
             }

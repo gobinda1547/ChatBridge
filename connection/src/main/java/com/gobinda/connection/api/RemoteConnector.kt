@@ -11,7 +11,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 
-class ConnectionManager(private val context: Context) {
+class RemoteConnector(private val context: Context) {
 
     companion object {
         private const val PICK_ROOM_TIMEOUT = 20000L
