@@ -41,6 +41,14 @@ class ConnectionManager(applicationContext: Context) : ConnectionMediator() {
         return signalSender.sendAnswer(roomId, answerSdp)
     }
 
+    override fun sendIceCandidate(
+        toRoom: String,
+        myRole: ConnectionRole,
+        candidates: List<IceCandidate>
+    ): Flow<Boolean> {
+        return signalSender.sendIceCandidate(toRoom, myRole, candidates)
+    }
+
     override suspend fun receiveIceCandidates(
         roomId: String, myRole: ConnectionRole
     ): Flow<List<IceCandidate>?> {

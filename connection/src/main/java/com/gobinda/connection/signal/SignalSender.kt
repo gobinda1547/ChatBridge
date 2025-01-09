@@ -32,6 +32,12 @@ class SignalSender(private val mediator: ConnectionMediator) {
         candidates: List<IceCandidate>
     ) = callbackFlow<Boolean> {
 
+        if (candidates.isEmpty()) {
+            trySend(false)
+            close()
+            return@callbackFlow
+        }
+
         val icePath = whereToUploadIceCandidates(myRole)
         val candidateMapList = candidates.map { candidate ->
             mapOf(
