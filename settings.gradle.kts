@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "MatchMakingTest"
 include(":app")
+include(":connection")
