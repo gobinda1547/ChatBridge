@@ -4,13 +4,20 @@ import com.gobinda.connection.internal.ConnectionRole
 import com.gobinda.connection.internal.le
 import com.google.firebase.database.*
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 import org.webrtc.*
 import kotlin.collections.get
 
 class SignalReceiver(private val parentRoomRef: DatabaseReference) {
 
-    fun receiveOffer(fromRoom: String) = callbackFlow<String?> {
+    fun receiveOffer(fromRoom: String, timeout: Long) = callbackFlow<String?> {
+        val currentJob = launch {
+            delay(timeout)
+            trySend(null)
+            close()
+        }
         val offerDataReference = parentRoomRef.child(fromRoom).child("offer")
         val offerListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -32,10 +39,18 @@ class SignalReceiver(private val parentRoomRef: DatabaseReference) {
         }
 
         offerDataReference.addValueEventListener(offerListener)
-        awaitClose { offerDataReference.removeEventListener(offerListener) }
+        awaitClose {
+            currentJob.cancel()
+            offerDataReference.removeEventListener(offerListener)
+        }
     }
 
-    fun receiveAnswer(fromRoom: String) = callbackFlow<String?> {
+    fun receiveAnswer(fromRoom: String, timeout: Long) = callbackFlow<String?> {
+        val currentJob = launch {
+            delay(timeout)
+            trySend(null)
+            close()
+        }
         val answerDataReference = parentRoomRef.child(fromRoom).child("answer")
         val answerListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -57,13 +72,21 @@ class SignalReceiver(private val parentRoomRef: DatabaseReference) {
         }
 
         answerDataReference.addValueEventListener(answerListener)
-        awaitClose { answerDataReference.removeEventListener(answerListener) }
+        awaitClose {
+            currentJob.cancel()
+            answerDataReference.removeEventListener(answerListener)
+        }
     }
 
     fun receiveIceCandidates(
         fromRoom: String,
-        myRole: ConnectionRole
+        myRole: ConnectionRole, timeout: Long
     ) = callbackFlow<List<IceCandidate>?> {
+        val currentJob = launch {
+            delay(timeout)
+            trySend(null)
+            close()
+        }
         val icePath = fromWhereToReceiveIceCandidates(myRole)
         val candidateDataReference = parentRoomRef.child(fromRoom).child(icePath)
         val candidateListener = object : ValueEventListener {
@@ -81,7 +104,10 @@ class SignalReceiver(private val parentRoomRef: DatabaseReference) {
         }
 
         candidateDataReference.addValueEventListener(candidateListener)
-        awaitClose { candidateDataReference.removeEventListener(candidateListener) }
+        awaitClose {
+            currentJob.cancel()
+            candidateDataReference.removeEventListener(candidateListener)
+        }
     }
 
     private fun parseSnapshotIntoCandidates(snapshot: DataSnapshot): List<IceCandidate>? {

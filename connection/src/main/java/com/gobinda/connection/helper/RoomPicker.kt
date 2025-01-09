@@ -7,13 +7,20 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.MutableData
 import com.google.firebase.database.Transaction
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 
 class RoomPicker(database: FirebaseDatabase) {
 
     private val waitingRoomRef: DatabaseReference = database.getReference("waiting")
 
-    fun pickOrWait(myRoomId: String) = callbackFlow<String?> {
+    fun pickOrWait(myRoomId: String, timeout: Long) = callbackFlow<String?> {
+        val currentJob = launch {
+            delay(timeout)
+            trySend(null)
+            close()
+        }
         val transaction = object : Transaction.Handler {
             var partnerInfo: String? = null
 
@@ -38,7 +45,7 @@ class RoomPicker(database: FirebaseDatabase) {
             }
         }
         waitingRoomRef.runTransaction(transaction)
-        awaitClose()
+        awaitClose { currentJob.cancel() }
     }
 
     private fun convertDataToStringList(data: Any?): MutableList<String> {
