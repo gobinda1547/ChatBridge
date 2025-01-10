@@ -4,7 +4,6 @@ import com.gobinda.connection.api.RemoteDevice
 import com.gobinda.connection.internal.ConnectionRole
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 
@@ -21,7 +20,7 @@ internal fun fromWhereToReceiveIceCandidates(myRole: ConnectionRole): String {
     }
 }
 
-fun confirmConnectionOrWait(source: RemoteDevice, timeout: Long) = callbackFlow<Boolean> {
+internal fun confirmConnectionOrWait(source: RemoteDevice, timeout: Long) = callbackFlow<Boolean> {
     val timerJob = launch {
         delay(timeout)
         trySend(false)

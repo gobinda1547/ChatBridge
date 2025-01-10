@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import org.webrtc.IceCandidate
 
-class IceCollector {
+internal class IceCollector {
 
     fun collectCandidates(stateFlow: StateFlow<List<IceCandidate>>, timeout: Long) = callbackFlow {
         val candidates = MutableStateFlow<List<IceCandidate>>(emptyList())

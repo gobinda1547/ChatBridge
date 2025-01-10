@@ -27,7 +27,7 @@ import org.webrtc.SdpObserver
 import org.webrtc.SessionDescription
 import java.nio.ByteBuffer
 
-class RemoteDevice(private val context: Context) : RemoteDeviceApi {
+internal class RemoteDevice(private val context: Context) : RemoteDeviceApi {
 
     private val _dataReceiver = MutableSharedFlow<ByteArray>(extraBufferCapacity = Int.MAX_VALUE)
     override val dataReceiver: SharedFlow<ByteArray> = _dataReceiver.asSharedFlow()
