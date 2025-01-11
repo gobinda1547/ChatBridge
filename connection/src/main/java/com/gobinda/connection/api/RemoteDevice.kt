@@ -3,6 +3,9 @@ package com.gobinda.connection.api
 import android.content.Context
 import com.gobinda.connection.internal.ConnectionRole
 import com.gobinda.connection.internal.li
+import com.gobinda.connection.rtc.CustomPeerConnectionObserver
+import com.gobinda.connection.rtc.initDataChannelForLeader
+import com.gobinda.connection.rtc.initPeerConnection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
@@ -21,9 +24,7 @@ import kotlinx.coroutines.withContext
 import org.webrtc.DataChannel
 import org.webrtc.IceCandidate
 import org.webrtc.MediaConstraints
-import org.webrtc.MediaStream
 import org.webrtc.PeerConnection
-import org.webrtc.PeerConnectionFactory
 import org.webrtc.SdpObserver
 import org.webrtc.SessionDescription
 import java.nio.ByteBuffer
@@ -33,76 +34,23 @@ internal class RemoteDevice(
     private val myRole: ConnectionRole
 ) : RemoteDeviceApi {
 
-    private val _dataReceiver = MutableSharedFlow<ByteArray>(extraBufferCapacity = Int.MAX_VALUE)
-    override val dataReceiver: SharedFlow<ByteArray> = _dataReceiver.asSharedFlow()
-
-    private var peerConnection: PeerConnection? = null
-    private var dataChannel: DataChannel? = null
-
-    private val _iceCandidates = MutableStateFlow<List<IceCandidate>>(emptyList())
-    internal val iceCandidates = _iceCandidates.asStateFlow()
-
-    private val _channelState = MutableStateFlow(false)
-    private val _iceConnState = MutableStateFlow<PeerConnection.IceConnectionState?>(null)
-
-    override val isConnected: StateFlow<Boolean> =
-        combine(_channelState, _iceConnState) { channelState, iceConnState ->
-            val con1 = channelState == true
-            val con21 = iceConnState == PeerConnection.IceConnectionState.CONNECTED
-            val con22 = iceConnState == PeerConnection.IceConnectionState.COMPLETED
-            con1 && (con21 || con22)
-        }.stateIn(
-            scope = CoroutineScope(Dispatchers.Default), // Provide a coroutine scope
-            started = SharingStarted.WhileSubscribed(5000), // Active while there are active subscribers
-            initialValue = false // Initial value
-        )
-
-    private val connectionObserver = object : PeerConnection.Observer {
-        override fun onSignalingChange(state: PeerConnection.SignalingState?) {
-            li("on signaling changed $state")
-        }
-
-        override fun onIceConnectionChange(state: PeerConnection.IceConnectionState?) {
+    private val connectionObserver = object : CustomPeerConnectionObserver() {
+        override fun whenIceConnectionChanged(state: PeerConnection.IceConnectionState) {
             li("on ice connection change invoked $state")
             _iceConnState.tryEmit(state)
         }
 
-        override fun onIceConnectionReceivingChange(receiving: Boolean) {
-            li("on ice connection receiving change $receiving")
+        override fun whenIceCandidateFound(candidate: IceCandidate) {
+            li("on ice candidate")
+            _iceCandidates.update { it + candidate }
         }
 
-        override fun onIceGatheringChange(p0: PeerConnection.IceGatheringState?) {
-            li("on ice gathering change $p0")
-        }
-
-        override fun onIceCandidate(candidate: IceCandidate?) {
-            candidate?.let { current ->
-                li("on ice candidate")
-                _iceCandidates.update { it + current }
-            }
-        }
-
-        override fun onIceCandidatesRemoved(candidates: Array<out IceCandidate>?) {
-            li("on ice candidate removed callback")
-        }
-
-        override fun onAddStream(stream: MediaStream?) {
-            li("on add stream callback")
-        }
-
-        override fun onRemoveStream(stream: MediaStream?) {
-            li("on remove stream callback")
-        }
-
-        override fun onDataChannel(channel: DataChannel?) {
+        override fun whenDataChannelFound(channel: DataChannel) {
             li("on data channel invoked")
             if (myRole == ConnectionRole.Child) {
-                initializeDataChannelAsChild(channel)
+                dataChannel = channel
+                dataChannel?.registerObserver(dataChannelObserver)
             }
-        }
-
-        override fun onRenegotiationNeeded() {
-            li("on renegotiation needed")
         }
     }
 
@@ -125,57 +73,39 @@ internal class RemoteDevice(
         }
     }
 
-    init {
-        initializePeerConnection()
-        if (myRole == ConnectionRole.Leader) {
-            initializeDataChannelAsLeader()
-        }
+    private val peerConnection = initPeerConnection(context, connectionObserver)
+    private var dataChannel: DataChannel? = when (myRole) {
+        ConnectionRole.Leader -> initDataChannelForLeader(peerConnection, dataChannelObserver)
+        else -> null
     }
 
-    private fun initializePeerConnection() {
-        val iceServers = listOf(
-            PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer()
+    private val _dataReceiver = MutableSharedFlow<ByteArray>(extraBufferCapacity = Int.MAX_VALUE)
+    override val dataReceiver: SharedFlow<ByteArray> = _dataReceiver.asSharedFlow()
+
+    private val _iceCandidates = MutableStateFlow<List<IceCandidate>>(emptyList())
+    internal val iceCandidates = _iceCandidates.asStateFlow()
+
+    private val _channelState = MutableStateFlow(false)
+    private val _iceConnState = MutableStateFlow<PeerConnection.IceConnectionState?>(null)
+
+    override val isConnected: StateFlow<Boolean> =
+        combine(_channelState, _iceConnState) { channelState, iceConnState ->
+            val con1 = channelState == true
+            val con21 = iceConnState == PeerConnection.IceConnectionState.CONNECTED
+            val con22 = iceConnState == PeerConnection.IceConnectionState.COMPLETED
+            con1 && (con21 || con22)
+        }.stateIn(
+            scope = CoroutineScope(Dispatchers.Default), // Provide a coroutine scope
+            started = SharingStarted.WhileSubscribed(5000), // Active while there are active subscribers
+            initialValue = false // Initial value
         )
-        val rtcConfig = PeerConnection.RTCConfiguration(iceServers).apply {
-            sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
-        }
 
-        val factory = getPeerConnectionFactory(context = context)
-        peerConnection = factory.createPeerConnection(rtcConfig, connectionObserver)
-    }
 
-    private fun initializeDataChannelAsLeader() {
-        val dataChannelInit = DataChannel.Init().apply {
-            ordered = true  // Ensure ordered delivery
-            maxRetransmits = 10 // Optional: Max retransmissions before giving up
-        }
-        dataChannel = peerConnection?.createDataChannel("data_channel", dataChannelInit)
-        dataChannel?.registerObserver(dataChannelObserver)
-    }
-
-    private fun initializeDataChannelAsChild(channel: DataChannel?) {
-        dataChannel = channel
-        dataChannel?.registerObserver(dataChannelObserver)
-    }
-
-    private fun getPeerConnectionFactory(context: Context): PeerConnectionFactory {
-        val options = PeerConnectionFactory.Options()
-        PeerConnectionFactory.initialize(
-            PeerConnectionFactory.InitializationOptions.builder(context)
-                .createInitializationOptions()
-        )
-        return PeerConnectionFactory.builder().setOptions(options).createPeerConnectionFactory()
-    }
 
     fun createOffer() = callbackFlow<String?> {
-        val currentConnection: PeerConnection = peerConnection ?: let {
-            trySend(null)
-            close()
-            return@callbackFlow
-        }
-        currentConnection.createOffer(object : SdpObserver {
+        peerConnection.createOffer(object : SdpObserver {
             override fun onCreateSuccess(sdp: SessionDescription) {
-                currentConnection.setLocalDescription(object : SdpObserver {
+                peerConnection.setLocalDescription(object : SdpObserver {
                     override fun onCreateSuccess(p0: SessionDescription?) {}
                     override fun onCreateFailure(p0: String?) {}
                     override fun onSetSuccess() {
@@ -202,16 +132,11 @@ internal class RemoteDevice(
     }
 
     fun createAnswer() = callbackFlow<String?> {
-        val currentConnection: PeerConnection = peerConnection ?: let {
-            trySend(null)
-            close()
-            return@callbackFlow
-        }
-        currentConnection.createAnswer(object : SdpObserver {
+        peerConnection.createAnswer(object : SdpObserver {
             override fun onSetFailure(error: String?) {}
             override fun onSetSuccess() {}
             override fun onCreateSuccess(sdp: SessionDescription) {
-                currentConnection.setLocalDescription(object : SdpObserver {
+                peerConnection.setLocalDescription(object : SdpObserver {
                     override fun onCreateSuccess(p0: SessionDescription?) {}
                     override fun onCreateFailure(p0: String?) {}
                     override fun onSetSuccess() {
@@ -235,12 +160,7 @@ internal class RemoteDevice(
     }
 
     fun handleOffer(offerSdp: String) = callbackFlow<Boolean> {
-        val currentConnection: PeerConnection = peerConnection ?: let {
-            trySend(false)
-            close()
-            return@callbackFlow
-        }
-        currentConnection.setRemoteDescription(object : SdpObserver {
+        peerConnection.setRemoteDescription(object : SdpObserver {
             override fun onCreateSuccess(p0: SessionDescription?) {}
             override fun onCreateFailure(error: String?) {}
             override fun onSetSuccess() {
@@ -257,12 +177,7 @@ internal class RemoteDevice(
     }
 
     fun handleAnswer(answerSdp: String) = callbackFlow<Boolean> {
-        val currentConnection: PeerConnection = peerConnection ?: let {
-            trySend(false)
-            close()
-            return@callbackFlow
-        }
-        currentConnection.setRemoteDescription(object : SdpObserver {
+        peerConnection.setRemoteDescription(object : SdpObserver {
             override fun onCreateSuccess(sdp: SessionDescription?) {}
             override fun onCreateFailure(error: String?) {}
             override fun onSetSuccess() {
@@ -279,7 +194,7 @@ internal class RemoteDevice(
     }
 
     fun handleCandidates(candidates: List<IceCandidate>) {
-        candidates.forEach { peerConnection?.addIceCandidate(it) }
+        candidates.forEach { peerConnection.addIceCandidate(it) }
     }
 
     override suspend fun sendData(byteArray: ByteArray): Boolean {
