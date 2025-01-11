@@ -8,7 +8,6 @@ import com.gobinda.connection.rtc.initDataChannelForLeader
 import com.gobinda.connection.rtc.initPeerConnection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -16,21 +15,17 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import org.webrtc.DataChannel
 import org.webrtc.IceCandidate
-import org.webrtc.MediaConstraints
 import org.webrtc.PeerConnection
-import org.webrtc.SdpObserver
-import org.webrtc.SessionDescription
 import java.nio.ByteBuffer
 
 internal class RemoteDevice(
-    private val context: Context,
+    context: Context,
     private val myRole: ConnectionRole
 ) : RemoteDeviceApi {
 
@@ -73,7 +68,7 @@ internal class RemoteDevice(
         }
     }
 
-    private val peerConnection = initPeerConnection(context, connectionObserver)
+    val peerConnection = initPeerConnection(context, connectionObserver)
     private var dataChannel: DataChannel? = when (myRole) {
         ConnectionRole.Leader -> initDataChannelForLeader(peerConnection, dataChannelObserver)
         else -> null
@@ -100,106 +95,9 @@ internal class RemoteDevice(
             initialValue = false // Initial value
         )
 
-
-
-    fun createOffer() = callbackFlow<String?> {
-        peerConnection.createOffer(object : SdpObserver {
-            override fun onCreateSuccess(sdp: SessionDescription) {
-                peerConnection.setLocalDescription(object : SdpObserver {
-                    override fun onCreateSuccess(p0: SessionDescription?) {}
-                    override fun onCreateFailure(p0: String?) {}
-                    override fun onSetSuccess() {
-                        trySend(sdp.description)
-                        close()
-                    }
-
-                    override fun onSetFailure(p0: String?) {
-                        trySend(null)
-                        close()
-                    }
-                }, sdp)
-            }
-
-            override fun onCreateFailure(error: String?) {
-                trySend(null)
-                close()
-            }
-
-            override fun onSetFailure(error: String?) {}
-            override fun onSetSuccess() {}
-        }, MediaConstraints())
-        awaitClose()
-    }
-
-    fun createAnswer() = callbackFlow<String?> {
-        peerConnection.createAnswer(object : SdpObserver {
-            override fun onSetFailure(error: String?) {}
-            override fun onSetSuccess() {}
-            override fun onCreateSuccess(sdp: SessionDescription) {
-                peerConnection.setLocalDescription(object : SdpObserver {
-                    override fun onCreateSuccess(p0: SessionDescription?) {}
-                    override fun onCreateFailure(p0: String?) {}
-                    override fun onSetSuccess() {
-                        trySend(sdp.description)
-                        close()
-                    }
-
-                    override fun onSetFailure(p0: String?) {
-                        trySend(null)
-                        close()
-                    }
-                }, sdp)
-            }
-
-            override fun onCreateFailure(error: String?) {
-                trySend(null)
-                close()
-            }
-        }, MediaConstraints())
-        awaitClose()
-    }
-
-    fun handleOffer(offerSdp: String) = callbackFlow<Boolean> {
-        peerConnection.setRemoteDescription(object : SdpObserver {
-            override fun onCreateSuccess(p0: SessionDescription?) {}
-            override fun onCreateFailure(error: String?) {}
-            override fun onSetSuccess() {
-                trySend(true)
-                close()
-            }
-
-            override fun onSetFailure(error: String?) {
-                trySend(false)
-                close()
-            }
-        }, SessionDescription(SessionDescription.Type.OFFER, offerSdp))
-        awaitClose()
-    }
-
-    fun handleAnswer(answerSdp: String) = callbackFlow<Boolean> {
-        peerConnection.setRemoteDescription(object : SdpObserver {
-            override fun onCreateSuccess(sdp: SessionDescription?) {}
-            override fun onCreateFailure(error: String?) {}
-            override fun onSetSuccess() {
-                trySend(true)
-                close()
-            }
-
-            override fun onSetFailure(error: String?) {
-                trySend(false)
-                close()
-            }
-        }, SessionDescription(SessionDescription.Type.ANSWER, answerSdp))
-        awaitClose()
-    }
-
-    fun handleCandidates(candidates: List<IceCandidate>) {
-        candidates.forEach { peerConnection.addIceCandidate(it) }
-    }
-
     override suspend fun sendData(byteArray: ByteArray): Boolean {
         li("send data channel state : ${dataChannel?.state()}")
-        return withContext(Dispatchers.IO) {
+        return isConnected.value && withContext(Dispatchers.IO) {
             val buffer = DataChannel.Buffer(ByteBuffer.wrap(byteArray), false)
             dataChannel?.send(buffer) == true
         }

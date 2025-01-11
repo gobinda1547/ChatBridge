@@ -1,6 +1,11 @@
 package com.gobinda.connection.api
 
 import android.content.Context
+import com.gobinda.connection.ext.createAnswer
+import com.gobinda.connection.ext.createOffer
+import com.gobinda.connection.ext.handleAnswer
+import com.gobinda.connection.ext.handleCandidates
+import com.gobinda.connection.ext.handleOffer
 import com.gobinda.connection.helper.IceCollector
 import com.gobinda.connection.helper.RoomPicker
 import com.gobinda.connection.helper.SignalManager
