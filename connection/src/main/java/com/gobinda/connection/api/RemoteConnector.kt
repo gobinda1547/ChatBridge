@@ -42,7 +42,7 @@ class RemoteConnector(private val context: Context) {
 
     private suspend fun handleAfterPartnerRoomFound(partnerRoomId: String): ConnReqResult {
         val myRole = ConnectionRole.Leader
-        val remoteDevice = RemoteDevice(context).initialize()
+        val remoteDevice = RemoteDevice(context, myRole)
 
         val offerSdp = remoteDevice.createOffer().firstOrNull() ?: let {
             return ConnReqResult.OfferCreationFailed
@@ -87,7 +87,7 @@ class RemoteConnector(private val context: Context) {
 
     private suspend fun handleAfterJoiningWaitingList(myRoomId: String): ConnReqResult {
         val myRole = ConnectionRole.Child
-        val remoteDevice = RemoteDevice(context).initialize()
+        val remoteDevice = RemoteDevice(context, myRole)
 
         val receivedOffer = signalManager.receiveOffer(
             myRoomId, RECEIVE_OFFER_TIMEOUT

@@ -1,6 +1,7 @@
 package com.gobinda.connection.api
 
 import android.content.Context
+import com.gobinda.connection.internal.ConnectionRole
 import com.gobinda.connection.internal.li
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,7 +28,10 @@ import org.webrtc.SdpObserver
 import org.webrtc.SessionDescription
 import java.nio.ByteBuffer
 
-internal class RemoteDevice(private val context: Context) : RemoteDeviceApi {
+internal class RemoteDevice(
+    private val context: Context,
+    private val myRole: ConnectionRole
+) : RemoteDeviceApi {
 
     private val _dataReceiver = MutableSharedFlow<ByteArray>(extraBufferCapacity = Int.MAX_VALUE)
     override val dataReceiver: SharedFlow<ByteArray> = _dataReceiver.asSharedFlow()
@@ -92,6 +96,9 @@ internal class RemoteDevice(private val context: Context) : RemoteDeviceApi {
 
         override fun onDataChannel(channel: DataChannel?) {
             li("on data channel invoked")
+            if (myRole == ConnectionRole.Child) {
+                initializeDataChannelAsChild(channel)
+            }
         }
 
         override fun onRenegotiationNeeded() {
@@ -118,27 +125,37 @@ internal class RemoteDevice(private val context: Context) : RemoteDeviceApi {
         }
     }
 
-    fun initialize(): RemoteDevice {
+    init {
+        initializePeerConnection()
+        if (myRole == ConnectionRole.Leader) {
+            initializeDataChannelAsLeader()
+        }
+    }
+
+    private fun initializePeerConnection() {
         val iceServers = listOf(
             PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer()
         )
         val rtcConfig = PeerConnection.RTCConfiguration(iceServers).apply {
             sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
         }
+
+        val factory = getPeerConnectionFactory(context = context)
+        peerConnection = factory.createPeerConnection(rtcConfig, connectionObserver)
+    }
+
+    private fun initializeDataChannelAsLeader() {
         val dataChannelInit = DataChannel.Init().apply {
             ordered = true  // Ensure ordered delivery
             maxRetransmits = 10 // Optional: Max retransmissions before giving up
         }
-
-        val factory = getPeerConnectionFactory(context = context)
-        peerConnection = factory.createPeerConnection(rtcConfig, connectionObserver)
         dataChannel = peerConnection?.createDataChannel("data_channel", dataChannelInit)
         dataChannel?.registerObserver(dataChannelObserver)
-        return this
     }
 
-    fun resetIceCandidates() {
-        _iceCandidates.update { emptyList() }
+    private fun initializeDataChannelAsChild(channel: DataChannel?) {
+        dataChannel = channel
+        dataChannel?.registerObserver(dataChannelObserver)
     }
 
     private fun getPeerConnectionFactory(context: Context): PeerConnectionFactory {
