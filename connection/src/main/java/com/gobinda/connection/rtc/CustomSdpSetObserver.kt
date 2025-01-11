@@ -3,7 +3,7 @@ package com.gobinda.connection.rtc
 import org.webrtc.SdpObserver
 import org.webrtc.SessionDescription
 
-abstract class CustomSdpSetObserver : SdpObserver {
+internal abstract class CustomSdpSetObserver : SdpObserver {
 
     abstract fun onSuccess()
     abstract fun onFailure()

@@ -90,13 +90,12 @@ internal class RemoteDevice(
             val con22 = iceConnState == PeerConnection.IceConnectionState.COMPLETED
             con1 && (con21 || con22)
         }.stateIn(
-            scope = CoroutineScope(Dispatchers.Default), // Provide a coroutine scope
-            started = SharingStarted.WhileSubscribed(5000), // Active while there are active subscribers
+            scope = CoroutineScope(Dispatchers.IO),
+            started = SharingStarted.WhileSubscribed(5000),
             initialValue = false // Initial value
         )
 
     override suspend fun sendData(byteArray: ByteArray): Boolean {
-        li("send data channel state : ${dataChannel?.state()}")
         return isConnected.value && withContext(Dispatchers.IO) {
             val buffer = DataChannel.Buffer(ByteBuffer.wrap(byteArray), false)
             dataChannel?.send(buffer) == true

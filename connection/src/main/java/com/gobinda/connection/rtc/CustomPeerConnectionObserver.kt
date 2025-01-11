@@ -5,7 +5,7 @@ import org.webrtc.IceCandidate
 import org.webrtc.MediaStream
 import org.webrtc.PeerConnection
 
-abstract class CustomPeerConnectionObserver : PeerConnection.Observer {
+internal abstract class CustomPeerConnectionObserver : PeerConnection.Observer {
 
     abstract fun whenIceConnectionChanged(state: PeerConnection.IceConnectionState)
     abstract fun whenIceCandidateFound(candidate: IceCandidate)
