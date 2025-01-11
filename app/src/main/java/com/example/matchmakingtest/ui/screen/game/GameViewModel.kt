@@ -83,6 +83,7 @@ class GameViewModel @Inject constructor(
     }
 
     fun sendMessage(message: String) {
+        if (message.trim().isEmpty()) return
         viewModelScope.launch(Dispatchers.IO) {
             if (remoteDevice?.sendData(message.toByteArray()) == true) {
                 _state.update {
