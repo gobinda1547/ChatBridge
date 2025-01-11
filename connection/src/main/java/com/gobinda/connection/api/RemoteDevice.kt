@@ -43,7 +43,10 @@ internal class RemoteDevice(private val context: Context) : RemoteDeviceApi {
 
     override val isConnected: StateFlow<Boolean> =
         combine(_channelState, _iceConnState) { channelState, iceConnState ->
-            channelState && iceConnState == PeerConnection.IceConnectionState.CONNECTED
+            val con1 = channelState == true
+            val con21 = iceConnState == PeerConnection.IceConnectionState.CONNECTED
+            val con22 = iceConnState == PeerConnection.IceConnectionState.COMPLETED
+            con1 && (con21 || con22)
         }.stateIn(
             scope = CoroutineScope(Dispatchers.Default), // Provide a coroutine scope
             started = SharingStarted.WhileSubscribed(5000), // Active while there are active subscribers
@@ -89,7 +92,6 @@ internal class RemoteDevice(private val context: Context) : RemoteDeviceApi {
 
         override fun onDataChannel(channel: DataChannel?) {
             li("on data channel invoked")
-            _channelState.tryEmit(channel != null)
         }
 
         override fun onRenegotiationNeeded() {
@@ -103,10 +105,12 @@ internal class RemoteDevice(private val context: Context) : RemoteDeviceApi {
         }
 
         override fun onStateChange() {
-            li("Data channel state changed ")
+            li("Data channel state changed ${dataChannel?.state()}")
+            _channelState.tryEmit(dataChannel?.state() == DataChannel.State.OPEN)
         }
 
         override fun onMessage(buffer: DataChannel.Buffer?) {
+            li("onMessage: $buffer")
             val byteBuffer = buffer?.data ?: return
             val bytes = ByteArray(byteBuffer.remaining())
             byteBuffer.get(bytes)
@@ -262,8 +266,9 @@ internal class RemoteDevice(private val context: Context) : RemoteDeviceApi {
     }
 
     override suspend fun sendData(byteArray: ByteArray): Boolean {
+        li("send data channel state : ${dataChannel?.state()}")
         return withContext(Dispatchers.IO) {
-            val buffer = DataChannel.Buffer(ByteBuffer.wrap(byteArray), true)
+            val buffer = DataChannel.Buffer(ByteBuffer.wrap(byteArray), false)
             dataChannel?.send(buffer) == true
         }
     }
