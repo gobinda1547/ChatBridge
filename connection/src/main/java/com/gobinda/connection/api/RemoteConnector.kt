@@ -13,21 +13,8 @@ import com.gobinda.connection.helper.confirmConnectionOrWait
 import com.gobinda.connection.internal.ConnectionRole
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 
 class RemoteConnector(private val context: Context) {
-
-    companion object {
-        private const val PICK_ROOM_TIMEOUT = 5000L
-        private const val SEND_OFFER_TIMEOUT = 5000L
-        private const val RECEIVE_OFFER_TIMEOUT = 20000L
-        private const val SEND_ANSWER_TIMEOUT = 5000L
-        private const val RECEIVE_ANSWER_TIMEOUT = 10000L
-        private const val SEND_ICE_TIMEOUT = 5000L
-        private const val RECEIVE_ICE_TIMEOUT = 5000L
-        private const val ICE_CANDIDATES_GENERATE_TIMEOUT = 5000L
-        private const val CONNECTION_CONFIRMATION_TIMEOUT = 5000L
-    }
 
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
 
@@ -37,9 +24,10 @@ class RemoteConnector(private val context: Context) {
 
     suspend fun connect(): ConnReqResult {
         val myRoomId = System.currentTimeMillis().toString()
-        val receivedRoomId = roomPicker.pickOrWait(myRoomId, PICK_ROOM_TIMEOUT).first()
+        val receivedRoomId = roomPicker.pickOrWait(myRoomId).first() ?: let {
+            return ConnReqResult.RoomPickingFailed
+        }
         return when (receivedRoomId) {
-            null -> ConnReqResult.RoomPickingFailed
             myRoomId -> handleAfterJoiningWaitingList(myRoomId)
             else -> handleAfterPartnerRoomFound(receivedRoomId)
         }
@@ -49,89 +37,56 @@ class RemoteConnector(private val context: Context) {
         val myRole = ConnectionRole.Leader
         val remoteDevice = RemoteDevice(context, myRole)
 
-        val offerSdp = remoteDevice.createOffer().firstOrNull() ?: let {
+        val offerSdp = remoteDevice.createOffer().first() ?: let {
             return ConnReqResult.OfferCreationFailed
         }
-        if (!signalManager.sendOffer(partnerRoomId, offerSdp, SEND_OFFER_TIMEOUT).first()) {
+        signalManager.sendOffer(partnerRoomId, offerSdp).first() ?: let {
             return ConnReqResult.SendingOfferFailed
         }
-        val receivedAnswer = signalManager.receiveAnswer(
-            partnerRoomId,
-            RECEIVE_ANSWER_TIMEOUT
-        ).first() ?: let {
+        val receivedAnswer = signalManager.receiveAnswer(partnerRoomId).first() ?: let {
             return ConnReqResult.ReceivingAnswerFailed
         }
-        if (remoteDevice.handleAnswer(receivedAnswer).firstOrNull() != true) {
+        remoteDevice.handleAnswer(receivedAnswer).first() ?: let {
             return ConnReqResult.HandleAnswerFailed
         }
-        val myCandidates = iceCollector.collectCandidates(
-            remoteDevice.iceCandidates,
-            ICE_CANDIDATES_GENERATE_TIMEOUT
-        ).first()
-        if (myCandidates.isEmpty()) {
-            return ConnReqResult.LocalIceCandidatesNotFound
-        }
-        val isCandidateSendingSuccessful = signalManager.sendIceCandidates(
-            partnerRoomId, myRole, myCandidates, SEND_ICE_TIMEOUT
-        ).firstOrNull() == true
-        if (isCandidateSendingSuccessful.not()) {
-            return ConnReqResult.SendingIceCandidateFailed
-        }
-        val receivedCandidates = signalManager.receiveIceCandidates(
-            partnerRoomId, myRole, RECEIVE_ICE_TIMEOUT
-        ).firstOrNull()
-        if (receivedCandidates == null || receivedCandidates.isEmpty()) {
-            return ConnReqResult.RemoteIceCandidatesNotFound
-        }
-        remoteDevice.handleCandidates(receivedCandidates)
-        if (!confirmConnectionOrWait(remoteDevice, CONNECTION_CONFIRMATION_TIMEOUT).first()) {
-            return ConnReqResult.CouldNotConfirmConnection
-        }
-        return ConnReqResult.Successful(remoteDevice)
+        return handleAfterInitialHandshake(remoteDevice, partnerRoomId, myRole)
     }
 
     private suspend fun handleAfterJoiningWaitingList(myRoomId: String): ConnReqResult {
         val myRole = ConnectionRole.Child
         val remoteDevice = RemoteDevice(context, myRole)
 
-        val receivedOffer = signalManager.receiveOffer(
-            myRoomId, RECEIVE_OFFER_TIMEOUT
-        ).firstOrNull() ?: let {
+        val receivedOffer = signalManager.receiveOffer(myRoomId).first() ?: let {
             return ConnReqResult.ReceivingOfferFailed
         }
-        if (remoteDevice.handleOffer(receivedOffer).firstOrNull() != true) {
+        remoteDevice.handleOffer(receivedOffer).first() ?: let {
             return ConnReqResult.HandleOfferFailed
         }
-        val answerSdp = remoteDevice.createAnswer().firstOrNull() ?: let {
+        val answerSdp = remoteDevice.createAnswer().first() ?: let {
             return ConnReqResult.AnswerCreationFailed
         }
-        val isAnswerSendingSuccessful = signalManager.sendAnswer(
-            myRoomId, answerSdp, SEND_ANSWER_TIMEOUT
-        ).firstOrNull() == true
-        if (isAnswerSendingSuccessful.not()) {
+        signalManager.sendAnswer(myRoomId, answerSdp).first() ?: let {
             return ConnReqResult.SendingAnswerFailed
         }
-        val myCandidates = iceCollector.collectCandidates(
-            remoteDevice.iceCandidates,
-            ICE_CANDIDATES_GENERATE_TIMEOUT
-        ).first()
-        if (myCandidates.isEmpty()) {
+        return handleAfterInitialHandshake(remoteDevice, myRoomId, myRole)
+    }
+
+    private suspend fun handleAfterInitialHandshake(
+        remoteDevice: RemoteDevice,
+        roomId: String,
+        myRole: ConnectionRole
+    ): ConnReqResult {
+        val myIces = iceCollector.collectCandidates(remoteDevice.iceCandidates).first() ?: let {
             return ConnReqResult.LocalIceCandidatesNotFound
         }
-        val isIceCandidatesSentSuccessfully = signalManager.sendIceCandidates(
-            myRoomId, myRole, myCandidates, SEND_ICE_TIMEOUT
-        ).firstOrNull() == true
-        if (isIceCandidatesSentSuccessfully.not()) {
+        signalManager.sendIceCandidates(roomId, myRole, myIces).first() ?: let {
             return ConnReqResult.SendingIceCandidateFailed
         }
-        val receivedCandidates = signalManager.receiveIceCandidates(
-            myRoomId, myRole, RECEIVE_ICE_TIMEOUT
-        ).firstOrNull()
-        if (receivedCandidates == null || receivedCandidates.isEmpty()) {
+        val remoteIces = signalManager.receiveIceCandidates(roomId, myRole).first() ?: let {
             return ConnReqResult.RemoteIceCandidatesNotFound
         }
-        remoteDevice.handleCandidates(receivedCandidates)
-        if (!confirmConnectionOrWait(remoteDevice, CONNECTION_CONFIRMATION_TIMEOUT).first()) {
+        remoteDevice.handleCandidates(remoteIces)
+        confirmConnectionOrWait(remoteDevice).first() ?: let {
             return ConnReqResult.CouldNotConfirmConnection
         }
         return ConnReqResult.Successful(remoteDevice)

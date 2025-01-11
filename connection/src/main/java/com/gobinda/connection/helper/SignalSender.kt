@@ -1,5 +1,8 @@
 package com.gobinda.connection.helper
 
+import com.gobinda.connection.api.SEND_ANSWER_TIMEOUT
+import com.gobinda.connection.api.SEND_ICE_TIMEOUT
+import com.gobinda.connection.api.SEND_OFFER_TIMEOUT
 import com.gobinda.connection.internal.ConnectionRole
 import com.google.firebase.database.DatabaseReference
 import kotlinx.coroutines.channels.awaitClose
@@ -10,15 +13,15 @@ import org.webrtc.IceCandidate
 
 internal class SignalSender(private val parentRoomRef: DatabaseReference) {
 
-    fun sendOffer(toRoom: String, offerSdp: String, timeout: Long) = callbackFlow<Boolean> {
+    fun sendOffer(toRoom: String, offerSdp: String) = callbackFlow<Any?> {
         val currentJob = launch {
-            delay(timeout)
-            trySend(false)
+            delay(SEND_OFFER_TIMEOUT)
+            trySend(null)
             close()
         }
         parentRoomRef.child(toRoom).child("offer").setValue(offerSdp)
             .addOnCompleteListener { task ->
-                trySend(task.isSuccessful)
+                trySend(if (task.isSuccessful) Any() else null)
                 close()
             }
         awaitClose {
@@ -26,15 +29,15 @@ internal class SignalSender(private val parentRoomRef: DatabaseReference) {
         }
     }
 
-    fun sendAnswer(toRoom: String, answerSdp: String, timeout: Long) = callbackFlow<Boolean> {
+    fun sendAnswer(toRoom: String, answerSdp: String) = callbackFlow<Any?> {
         val currentJob = launch {
-            delay(timeout)
-            trySend(false)
+            delay(SEND_ANSWER_TIMEOUT)
+            trySend(null)
             close()
         }
         parentRoomRef.child(toRoom).child("answer").setValue(answerSdp)
             .addOnCompleteListener { task ->
-                trySend(task.isSuccessful)
+                trySend(if (task.isSuccessful) Any() else null)
                 close()
             }
         awaitClose {
@@ -45,18 +48,17 @@ internal class SignalSender(private val parentRoomRef: DatabaseReference) {
     fun sendIceCandidates(
         toRoom: String,
         myRole: ConnectionRole,
-        candidates: List<IceCandidate>,
-        timeout: Long
-    ) = callbackFlow<Boolean> {
+        candidates: List<IceCandidate>
+    ) = callbackFlow<Any?> {
 
         val currentJob = launch {
-            delay(timeout)
-            trySend(false)
+            delay(SEND_ICE_TIMEOUT)
+            trySend(null)
             close()
         }
 
         if (candidates.isEmpty()) {
-            trySend(false)
+            trySend(null)
             close()
             return@callbackFlow
         }
@@ -72,7 +74,7 @@ internal class SignalSender(private val parentRoomRef: DatabaseReference) {
 
         parentRoomRef.child(toRoom).child(icePath).setValue(candidateMapList)
             .addOnCompleteListener { task ->
-                trySend(task.isSuccessful)
+                trySend(if (task.isSuccessful) Any() else null)
                 close()
             }
 

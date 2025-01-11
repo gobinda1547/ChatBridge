@@ -59,34 +59,34 @@ internal fun RemoteDevice.createAnswer() = callbackFlow<String?> {
     awaitClose()
 }
 
-internal fun RemoteDevice.handleOffer(offerSdp: String) = callbackFlow<Boolean> {
+internal fun RemoteDevice.handleOffer(offerSdp: String) = callbackFlow<Any?> {
     peerConnection.setRemoteDescription(object : SdpObserver {
         override fun onCreateSuccess(p0: SessionDescription?) {}
         override fun onCreateFailure(error: String?) {}
         override fun onSetSuccess() {
-            trySend(true)
+            trySend(Any())
             close()
         }
 
         override fun onSetFailure(error: String?) {
-            trySend(false)
+            trySend(null)
             close()
         }
     }, SessionDescription(SessionDescription.Type.OFFER, offerSdp))
     awaitClose()
 }
 
-internal fun RemoteDevice.handleAnswer(answerSdp: String) = callbackFlow<Boolean> {
+internal fun RemoteDevice.handleAnswer(answerSdp: String) = callbackFlow<Any?> {
     peerConnection.setRemoteDescription(object : SdpObserver {
         override fun onCreateSuccess(sdp: SessionDescription?) {}
         override fun onCreateFailure(error: String?) {}
         override fun onSetSuccess() {
-            trySend(true)
+            trySend(Any())
             close()
         }
 
         override fun onSetFailure(error: String?) {
-            trySend(false)
+            trySend(null)
             close()
         }
     }, SessionDescription(SessionDescription.Type.ANSWER, answerSdp))

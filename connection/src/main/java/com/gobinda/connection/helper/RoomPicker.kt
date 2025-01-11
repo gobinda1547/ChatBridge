@@ -1,5 +1,6 @@
 package com.gobinda.connection.helper
 
+import com.gobinda.connection.api.PICK_ROOM_TIMEOUT
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -15,9 +16,9 @@ internal class RoomPicker(database: FirebaseDatabase) {
 
     private val waitingRoomRef: DatabaseReference = database.getReference("waiting")
 
-    fun pickOrWait(myRoomId: String, timeout: Long) = callbackFlow<String?> {
+    fun pickOrWait(myRoomId: String) = callbackFlow<String?> {
         val currentJob = launch {
-            delay(timeout)
+            delay(PICK_ROOM_TIMEOUT)
             trySend(null)
             close()
         }

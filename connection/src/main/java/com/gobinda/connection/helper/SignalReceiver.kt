@@ -1,7 +1,9 @@
 package com.gobinda.connection.helper
 
+import com.gobinda.connection.api.RECEIVE_ANSWER_TIMEOUT
+import com.gobinda.connection.api.RECEIVE_ICE_TIMEOUT
+import com.gobinda.connection.api.RECEIVE_OFFER_TIMEOUT
 import com.gobinda.connection.internal.ConnectionRole
-import com.gobinda.connection.internal.le
 import com.google.firebase.database.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
@@ -12,9 +14,9 @@ import kotlin.collections.get
 
 internal class SignalReceiver(private val parentRoomRef: DatabaseReference) {
 
-    fun receiveOffer(fromRoom: String, timeout: Long) = callbackFlow<String?> {
+    fun receiveOffer(fromRoom: String) = callbackFlow<String?> {
         val currentJob = launch {
-            delay(timeout)
+            delay(RECEIVE_OFFER_TIMEOUT)
             trySend(null)
             close()
         }
@@ -32,7 +34,6 @@ internal class SignalReceiver(private val parentRoomRef: DatabaseReference) {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                le("receiveOffer: found database error ${error.message}")
                 trySend(null)
                 close()
             }
@@ -45,9 +46,9 @@ internal class SignalReceiver(private val parentRoomRef: DatabaseReference) {
         }
     }
 
-    fun receiveAnswer(fromRoom: String, timeout: Long) = callbackFlow<String?> {
+    fun receiveAnswer(fromRoom: String) = callbackFlow<String?> {
         val currentJob = launch {
-            delay(timeout)
+            delay(RECEIVE_ANSWER_TIMEOUT)
             trySend(null)
             close()
         }
@@ -65,7 +66,6 @@ internal class SignalReceiver(private val parentRoomRef: DatabaseReference) {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                le("receiveAnswer: found database error ${error.message}")
                 trySend(null)
                 close()
             }
@@ -80,10 +80,10 @@ internal class SignalReceiver(private val parentRoomRef: DatabaseReference) {
 
     fun receiveIceCandidates(
         fromRoom: String,
-        myRole: ConnectionRole, timeout: Long
+        myRole: ConnectionRole
     ) = callbackFlow<List<IceCandidate>?> {
         val currentJob = launch {
-            delay(timeout)
+            delay(RECEIVE_ICE_TIMEOUT)
             trySend(null)
             close()
         }
@@ -92,12 +92,12 @@ internal class SignalReceiver(private val parentRoomRef: DatabaseReference) {
         val candidateListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists() == false) return
-                trySend(parseSnapshotIntoCandidates(snapshot))
+                val partnerIces = parseSnapshotIntoCandidates(snapshot) ?: emptyList()
+                trySend(if (partnerIces.isNotEmpty()) partnerIces else null)
                 close()
             }
 
             override fun onCancelled(error: DatabaseError) {
-                le("receiveIceCandidates: found database error ${error.message}")
                 trySend(null)
                 close()
             }

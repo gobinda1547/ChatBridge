@@ -1,5 +1,6 @@
 package com.gobinda.connection.helper
 
+import com.gobinda.connection.api.CONNECTION_CONFIRMATION_TIMEOUT
 import com.gobinda.connection.api.RemoteDevice
 import com.gobinda.connection.internal.ConnectionRole
 import kotlinx.coroutines.channels.awaitClose
@@ -20,17 +21,17 @@ internal fun fromWhereToReceiveIceCandidates(myRole: ConnectionRole): String {
     }
 }
 
-internal fun confirmConnectionOrWait(source: RemoteDevice, timeout: Long) = callbackFlow<Boolean> {
+internal fun confirmConnectionOrWait(source: RemoteDevice) = callbackFlow<Any?> {
     val timerJob = launch {
-        delay(timeout)
-        trySend(false)
+        delay(CONNECTION_CONFIRMATION_TIMEOUT)
+        trySend(null)
         close()
     }
 
     val collectionJob = launch {
         source.isConnected.collect { isConnected ->
             if (isConnected) {
-                trySend(true)
+                trySend(Any())
                 close()
             }
         }

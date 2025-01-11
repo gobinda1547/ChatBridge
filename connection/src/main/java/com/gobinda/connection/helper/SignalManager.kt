@@ -12,27 +12,27 @@ internal class SignalManager(database: FirebaseDatabase) {
     private val signalSender = SignalSender(parentRoomRef)
     private val signalReceiver = SignalReceiver(parentRoomRef)
 
-    fun sendOffer(toRoom: String, offerSdp: String, timeout: Long) =
-        signalSender.sendOffer(toRoom, offerSdp, timeout)
+    fun sendOffer(toRoom: String, offerSdp: String) =
+        signalSender.sendOffer(toRoom, offerSdp)
 
-    fun sendAnswer(toRoom: String, answerSdp: String, timeout: Long) =
-        signalSender.sendAnswer(toRoom, answerSdp, timeout)
+    fun sendAnswer(toRoom: String, answerSdp: String) =
+        signalSender.sendAnswer(toRoom, answerSdp)
 
     fun sendIceCandidates(
         toRoom: String,
         myRole: ConnectionRole,
-        candidates: List<IceCandidate>, timeout: Long
-    ) = signalSender.sendIceCandidates(toRoom, myRole, candidates, timeout)
+        candidates: List<IceCandidate>
+    ) = signalSender.sendIceCandidates(toRoom, myRole, candidates)
 
-    fun receiveOffer(fromRoom: String, timeout: Long) =
-        signalReceiver.receiveOffer(fromRoom, timeout)
+    fun receiveOffer(fromRoom: String) =
+        signalReceiver.receiveOffer(fromRoom)
 
-    fun receiveAnswer(fromRoom: String, timeout: Long) =
-        signalReceiver.receiveAnswer(fromRoom, timeout)
+    fun receiveAnswer(fromRoom: String) =
+        signalReceiver.receiveAnswer(fromRoom)
 
     fun receiveIceCandidates(
         fromRoom: String,
-        myRole: ConnectionRole, timeout: Long
-    ) = signalReceiver.receiveIceCandidates(fromRoom, myRole, timeout)
+        myRole: ConnectionRole
+    ) = signalReceiver.receiveIceCandidates(fromRoom, myRole)
 
 }

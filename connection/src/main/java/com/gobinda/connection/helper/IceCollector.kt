@@ -1,5 +1,6 @@
 package com.gobinda.connection.helper
 
+import com.gobinda.connection.api.ICE_CANDIDATES_GENERATE_TIMEOUT
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,12 +11,13 @@ import org.webrtc.IceCandidate
 
 internal class IceCollector {
 
-    fun collectCandidates(stateFlow: StateFlow<List<IceCandidate>>, timeout: Long) = callbackFlow {
+    fun collectCandidates(stateFlow: StateFlow<List<IceCandidate>>) = callbackFlow {
         val candidates = MutableStateFlow<List<IceCandidate>>(emptyList())
 
         val timerJob = launch {
-            delay(timeout)
-            trySend(candidates.value)
+            delay(ICE_CANDIDATES_GENERATE_TIMEOUT)
+            val myCandidates = candidates.value
+            trySend(if (myCandidates.isNotEmpty()) myCandidates else null)
             close()
         }
 
