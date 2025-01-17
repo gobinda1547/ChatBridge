@@ -53,38 +53,51 @@ fun GameScreen(
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            GameScreenMainContent(state.value, viewModel)
+            GameScreenMainContent(state.value, onUiAction = { handleUiAction(it, viewModel) })
         }
     }
 }
 
-@Composable
-fun GameScreenMainContent(state: GameScreenState, viewModel: GameViewModel) {
-    when (state.connectionState) {
-        ConnectionState.Connecting -> GameScreenMainContentConnecting(state)
-        ConnectionState.Connected -> GameScreenMainContentConnected(state, viewModel)
-        ConnectionState.NotConnected -> GameScreenMainContentNotConnected(state, viewModel)
+private fun handleUiAction(action: GameScreenUiAction, viewModel: GameViewModel) {
+    when (action) {
+        GameScreenUiAction.TryToConnect -> viewModel.tryToConnect()
+        is GameScreenUiAction.SendMessage -> viewModel.sendMessage(action.message)
     }
 }
 
 @Composable
-fun GameScreenMainContentNotConnected(state: GameScreenState, viewModel: GameViewModel) {
+fun GameScreenMainContent(state: GameScreenState, onUiAction: (GameScreenUiAction) -> Unit) {
+    when (state.connectionState) {
+        ConnectionState.Connecting -> GameScreenMainContentConnecting()
+        ConnectionState.Connected -> GameScreenMainContentConnected(state, onUiAction)
+        ConnectionState.NotConnected -> GameScreenMainContentNotConnected(state, onUiAction)
+    }
+}
+
+@Composable
+fun GameScreenMainContentNotConnected(
+    state: GameScreenState,
+    onUiAction: (GameScreenUiAction) -> Unit
+) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Button(onClick = { viewModel.tryToConnect() }) {
+        Button(onClick = { onUiAction(GameScreenUiAction.TryToConnect) }) {
             Text(text = "Connect")
         }
     }
 }
 
 @Composable
-fun GameScreenMainContentConnecting(state: GameScreenState) {
+fun GameScreenMainContentConnecting() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(text = "Connecting")
     }
 }
 
 @Composable
-fun GameScreenMainContentConnected(state: GameScreenState, viewModel: GameViewModel) {
+fun GameScreenMainContentConnected(
+    state: GameScreenState,
+    onUiAction: (GameScreenUiAction) -> Unit
+) {
     val scrollState = rememberScrollState()
     Column(modifier = Modifier.fillMaxSize()) {
         Box(
@@ -99,7 +112,7 @@ fun GameScreenMainContentConnected(state: GameScreenState, viewModel: GameViewMo
                     .padding(8.dp) // Inner padding
             ) {
                 Text(
-                    text = state.message,
+                    text = state.messages.map { it.text }.joinToString("\n"),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -125,7 +138,7 @@ fun GameScreenMainContentConnected(state: GameScreenState, viewModel: GameViewMo
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            Button(onClick = { viewModel.sendMessage(inputText.value) }) {
+            Button(onClick = { onUiAction(GameScreenUiAction.SendMessage(inputText.value)) }) {
                 Text("Submit")
             }
         }
