@@ -61,7 +61,7 @@ fun GameScreen(
 @Composable
 fun GameScreenMainContent(state: GameScreenState, viewModel: GameViewModel) {
     when (state.connectionState) {
-        ConnectionState.Connecting -> GameScreenMainContentNotConnecting(state)
+        ConnectionState.Connecting -> GameScreenMainContentConnecting(state)
         ConnectionState.Connected -> GameScreenMainContentConnected(state, viewModel)
         ConnectionState.NotConnected -> GameScreenMainContentNotConnected(state, viewModel)
     }
@@ -77,7 +77,7 @@ fun GameScreenMainContentNotConnected(state: GameScreenState, viewModel: GameVie
 }
 
 @Composable
-fun GameScreenMainContentNotConnecting(state: GameScreenState) {
+fun GameScreenMainContentConnecting(state: GameScreenState) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(text = "Connecting")
     }

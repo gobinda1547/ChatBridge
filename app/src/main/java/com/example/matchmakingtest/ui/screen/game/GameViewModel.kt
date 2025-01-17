@@ -10,7 +10,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,8 +35,9 @@ class GameViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            dataReceiverChannel.consumeEach { receivedData ->
-                _state.update { it.copy(message = it.message + "\nrec:" + String(receivedData)) }
+            dataReceiverChannel.consumeEach { recData ->
+                val now = SingleMessage(String(recData), MessageSentOrReceived.Received)
+                _state.update { it.copy(messages = it.messages + now) }
             }
         }
     }
@@ -85,49 +85,12 @@ class GameViewModel @Inject constructor(
     fun sendMessage(message: String) {
         if (message.trim().isEmpty()) return
         viewModelScope.launch(Dispatchers.IO) {
-            if (remoteDevice?.sendData(message.toByteArray()) == true) {
-                _state.update {
-                    it.copy(message = it.message + "\nsent:" + message)
-                }
+            val sendingStatus = when (remoteDevice?.sendData(message.toByteArray())) {
+                true -> MessageSentOrReceived.Sent
+                else -> MessageSentOrReceived.SendingFailed
             }
+            val now = SingleMessage(message, sendingStatus)
+            _state.update { it.copy(messages = it.messages + now) }
         }
     }
-
-
-//
-//    val roomId = ROOM_ID
-//
-//    fun handleSendOffer() {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            signalingManager.listenForAnswer(roomId) { answer ->
-//                webRTCManager.handleAnswer(answer)
-//            }
-//        }
-//        viewModelScope.launch(Dispatchers.IO) {
-//            signalingManager.listenForCandidates(roomId, "r") { candidate ->
-//                webRTCManager.handleCandidate(roomId, candidate)
-//            }
-//        }
-//        viewModelScope.launch(Dispatchers.IO) {
-//            webRTCManager.createPeerConnection("s")
-//            webRTCManager.createOffer(roomId)
-//        }
-//    }
-//
-//    fun waitAndSee() {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            signalingManager.listenForOffer(roomId) { offer ->
-//                webRTCManager.createAnswer(roomId, offer)
-//            }
-//        }
-//        viewModelScope.launch(Dispatchers.IO) {
-//            signalingManager.listenForCandidates(roomId, "s") { candidate ->
-//                webRTCManager.handleCandidate(roomId, candidate)
-//            }
-//        }
-//        viewModelScope.launch(Dispatchers.IO) {
-//            webRTCManager.createPeerConnection("r")
-//        }
-//    }
-
 }
