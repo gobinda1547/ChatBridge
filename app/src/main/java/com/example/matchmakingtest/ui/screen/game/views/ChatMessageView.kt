@@ -36,10 +36,19 @@ private fun SingleMessageView(message: SingleMessage) {
         else -> TextAlign.Start
     }
 
+    val startPadding = when (message.isSentOrReceived) {
+        MessageSentOrReceived.Received -> 16.dp
+        else -> 32.dp
+    }
+    val endPadding = when (message.isSentOrReceived) {
+        MessageSentOrReceived.Received -> 32.dp
+        else -> 16.dp
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(start = startPadding, top = 8.dp, end = endPadding, bottom = 8.dp),
         horizontalArrangement = arrangementValue
     ) {
         Box(
