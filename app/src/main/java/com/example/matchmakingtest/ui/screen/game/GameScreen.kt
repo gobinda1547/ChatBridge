@@ -153,7 +153,7 @@ fun PreviewGameScreenMainContentConnected() {
         connectionState = ConnectionState.Connected,
         messages = listOf(
             SingleMessage("Hello", MessageSentOrReceived.Sent),
-            SingleMessage("How are you?", MessageSentOrReceived.Sent),
+            SingleMessage("How are you?", MessageSentOrReceived.Received),
             SingleMessage("I'm fine, thank you!", MessageSentOrReceived.Sent)
         )
     )
