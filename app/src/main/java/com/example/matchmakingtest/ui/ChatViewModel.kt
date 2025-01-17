@@ -57,7 +57,12 @@ class ChatViewModel @Inject constructor(
         connectionStateHandlerJob?.cancel()
         connectionStateHandlerJob = null
 
-        _state.update { it.copy(connectionState = ConnectionState.Connecting) }
+        _state.update {
+            it.copy(
+                connectionState = ConnectionState.Connecting,
+                messages = emptyList()
+            )
+        }
 
         viewModelScope.launch(Dispatchers.IO) {
             val connectionStatus = remoteConnector.connect()
@@ -72,7 +77,12 @@ class ChatViewModel @Inject constructor(
                 connectionStateHandlerJob = CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
                     connectionStatus.remoteDevice.isConnected.collect { isConnected ->
                         if (isConnected.not()) {
-                            _state.update { it.copy(connectionState = ConnectionState.NotConnected) }
+                            _state.update {
+                                it.copy(
+                                    connectionState = ConnectionState.NotConnected,
+                                    messages = emptyList()
+                                )
+                            }
                             remoteDevice = null
                             dataReceiverJob?.cancel()
                             connectionStateHandlerJob?.cancel()
