@@ -67,32 +67,7 @@ class ChatViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val connectionStatus = remoteConnector.connect()
             logI("connection status received: $connectionStatus")
-            if (connectionStatus is ConnReqResult.Successful) {
-                remoteDevice = connectionStatus.remoteDevice
-                dataReceiverJob = CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
-                    connectionStatus.remoteDevice.dataReceiver.collect {
-                        dataReceiverChannel.trySend(it)
-                    }
-                }
-                connectionStateHandlerJob = CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
-                    connectionStatus.remoteDevice.isConnected.collect { isConnected ->
-                        if (isConnected.not()) {
-                            _state.update {
-                                it.copy(
-                                    connectionState = ConnectionState.NotConnected,
-                                    messages = emptyList()
-                                )
-                            }
-                            remoteDevice = null
-                            dataReceiverJob?.cancel()
-                            connectionStateHandlerJob?.cancel()
-                        }
-                    }
-                }
-                _state.update { it.copy(connectionState = ConnectionState.Connected) }
-                return@launch
-            }
-            _state.update { it.copy(connectionState = ConnectionState.NotConnected) }
+            onConnectionRequestResult(connectionStatus)
         }
     }
 
@@ -106,5 +81,51 @@ class ChatViewModel @Inject constructor(
             val now = SingleMessage(message, sendingStatus)
             _state.update { it.copy(messages = it.messages + now) }
         }
+    }
+
+    private fun onConnectionRequestResult(connectionStatus: ConnReqResult) {
+
+        if (connectionStatus !is ConnReqResult.Successful) {
+            // since connection request failed, so we will update the state and
+            // just return, we can also send a toast message here but not necessary
+            _state.update { it.copy(connectionState = ConnectionState.NotConnected) }
+            return
+        }
+
+        // since above condition is false that means we are connected now
+        // so we have to set data receiver and connection state change receiver
+        // we also have to store the remote device reference for sending data
+        remoteDevice = connectionStatus.remoteDevice
+
+        // setting up the data receiver
+        dataReceiverJob = CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
+            connectionStatus.remoteDevice.dataReceiver.collect {
+                dataReceiverChannel.trySend(it)
+            }
+        }
+
+        // setting up the connection state receiver
+        connectionStateHandlerJob = CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
+            connectionStatus.remoteDevice.isConnected.collect { isConnected ->
+                if (isConnected.not()) {
+                    handleOnDisconnected()
+                }
+            }
+        }
+
+        // finally we can update the state to let the ui layer know that we are connected
+        _state.update { it.copy(connectionState = ConnectionState.Connected) }
+    }
+
+    private fun handleOnDisconnected() {
+        _state.update {
+            it.copy(
+                connectionState = ConnectionState.NotConnected,
+                messages = emptyList()
+            )
+        }
+        remoteDevice = null
+        dataReceiverJob?.cancel()
+        connectionStateHandlerJob?.cancel()
     }
 }

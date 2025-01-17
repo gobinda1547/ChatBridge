@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.matchmakingtest.ui.models.MessageSentOrReceived
 import com.example.matchmakingtest.ui.models.SingleMessage
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 private fun SingleMessageView(message: SingleMessage) {
@@ -57,7 +59,7 @@ private fun SingleMessageView(message: SingleMessage) {
                     color = bgColor,
                     shape = RoundedCornerShape(8.dp)
                 )
-                .padding(8.dp)
+                .padding(16.dp, 8.dp, 16.dp, 8.dp)
         ) {
             Text(
                 text = message.text,
@@ -108,7 +110,16 @@ private fun PreviewChatMessageView() {
 
 @Composable
 fun ChatMessagesView(modifier: Modifier, messages: List<SingleMessage>) {
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            listState.animateScrollToItem(messages.size - 1)
+        }
+    }
+
     LazyColumn(
+        state = listState,
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
