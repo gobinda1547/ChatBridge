@@ -24,7 +24,7 @@ fun InputFieldBasicPart(
             value = textNow,
             onValueChange = onTextChanged,
             textStyle = TextStyle(
-                color = MaterialTheme.colorScheme.onBackground,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
                 fontSize = MaterialTheme.typography.titleLarge.fontSize,
                 fontStyle = MaterialTheme.typography.titleLarge.fontStyle,

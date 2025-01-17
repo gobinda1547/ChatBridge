@@ -25,11 +25,11 @@ private fun SingleMessageView(message: SingleMessage) {
     }
     val bgColor = when (message.isSentOrReceived) {
         MessageSentOrReceived.Received -> MaterialTheme.colorScheme.primary
-        else -> Color.LightGray
+        else -> MaterialTheme.colorScheme.secondary
     }
     val textColor: Color = when (message.isSentOrReceived) {
-        MessageSentOrReceived.Received -> Color.White
-        else -> Color.Black
+        MessageSentOrReceived.Received -> MaterialTheme.colorScheme.onPrimary
+        else -> MaterialTheme.colorScheme.onSecondary
     }
     val textAlignmentValue: TextAlign = when (message.isSentOrReceived) {
         MessageSentOrReceived.Received -> TextAlign.End

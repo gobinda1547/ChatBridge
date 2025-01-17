@@ -19,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -97,6 +96,6 @@ fun GameScreenMainContentConnected(
     Column {
         ChatMessagesView(modifier = Modifier.weight(1f), state.messages)
         Spacer(modifier = Modifier.size(8.dp))
-        ChatInputDesign(bgColor = Color.LightGray, onUiAction)
+        ChatInputDesign(onUiAction)
     }
 }
