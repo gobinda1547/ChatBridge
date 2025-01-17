@@ -72,6 +72,4 @@ dependencies {
     // Hilt library
     implementation(libs.google.dagger.hilt)
     kapt(libs.google.dagger.hilt.compiler)
-
-    implementation(libs.webrtc)
 }
