@@ -1,4 +1,4 @@
-package com.example.matchmakingtest.ui.screen.game
+package com.example.matchmakingtest.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,20 +25,16 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
-import com.example.matchmakingtest.ui.screen.game.models.ConnectionState
-import com.example.matchmakingtest.ui.screen.game.models.GameScreenState
-import com.example.matchmakingtest.ui.screen.game.models.GameScreenUiAction
-import com.example.matchmakingtest.ui.screen.game.views.ChatInputDesign
-import com.example.matchmakingtest.ui.screen.game.views.ChatMessagesView
-import com.example.matchmakingtest.ui.screen.game.views.TopAppBarDesign
+import com.example.matchmakingtest.ui.models.ConnectionState
+import com.example.matchmakingtest.ui.models.GameScreenState
+import com.example.matchmakingtest.ui.models.GameScreenUiAction
+import com.example.matchmakingtest.ui.views.ChatInputDesign
+import com.example.matchmakingtest.ui.views.ChatMessagesView
+import com.example.matchmakingtest.ui.views.TopAppBarDesign
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun GameScreen(
-    navController: NavController,
-    viewModel: GameViewModel = hiltViewModel()
-) {
+fun ChatScreen(viewModel: ChatViewModel = hiltViewModel()) {
     val state = viewModel.state.collectAsStateWithLifecycle()
     val imeHeight = with(LocalDensity.current) { WindowInsets.ime.getBottom(this).toDp() }
 
@@ -61,7 +57,7 @@ fun GameScreen(
     }
 }
 
-private fun handleUiAction(action: GameScreenUiAction, viewModel: GameViewModel) {
+private fun handleUiAction(action: GameScreenUiAction, viewModel: ChatViewModel) {
     when (action) {
         GameScreenUiAction.TryToConnect -> viewModel.tryToConnect()
         is GameScreenUiAction.SendMessage -> viewModel.sendMessage(action.message)

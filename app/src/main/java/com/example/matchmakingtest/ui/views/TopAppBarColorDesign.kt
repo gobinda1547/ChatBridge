@@ -1,4 +1,4 @@
-package com.example.matchmakingtest.ui.screen.game.views
+package com.example.matchmakingtest.ui.views
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme

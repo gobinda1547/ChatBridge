@@ -1,12 +1,12 @@
-package com.example.matchmakingtest.ui.screen.game
+package com.example.matchmakingtest.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.matchmakingtest.app.logI
-import com.example.matchmakingtest.ui.screen.game.models.ConnectionState
-import com.example.matchmakingtest.ui.screen.game.models.GameScreenState
-import com.example.matchmakingtest.ui.screen.game.models.MessageSentOrReceived
-import com.example.matchmakingtest.ui.screen.game.models.SingleMessage
+import com.example.matchmakingtest.ui.models.ConnectionState
+import com.example.matchmakingtest.ui.models.GameScreenState
+import com.example.matchmakingtest.ui.models.MessageSentOrReceived
+import com.example.matchmakingtest.ui.models.SingleMessage
 import com.gobinda.connection.api.ConnReqResult
 import com.gobinda.connection.api.RemoteConnector
 import com.gobinda.connection.api.RemoteDeviceApi
@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class GameViewModel @Inject constructor(
+class ChatViewModel @Inject constructor(
     private val remoteConnector: RemoteConnector
 ) : ViewModel() {
 

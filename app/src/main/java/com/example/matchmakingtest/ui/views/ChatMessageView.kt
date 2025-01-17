@@ -1,4 +1,4 @@
-package com.example.matchmakingtest.ui.screen.game.views
+package com.example.matchmakingtest.ui.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,8 +14,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.matchmakingtest.ui.screen.game.models.MessageSentOrReceived
-import com.example.matchmakingtest.ui.screen.game.models.SingleMessage
+import com.example.matchmakingtest.ui.models.MessageSentOrReceived
+import com.example.matchmakingtest.ui.models.SingleMessage
 
 @Composable
 private fun SingleMessageView(message: SingleMessage) {

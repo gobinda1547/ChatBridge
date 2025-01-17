@@ -1,4 +1,4 @@
-package com.example.matchmakingtest.ui.screen.game.views;
+package com.example.matchmakingtest.ui.views
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth

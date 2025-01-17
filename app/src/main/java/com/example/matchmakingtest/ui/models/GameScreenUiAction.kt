@@ -1,4 +1,4 @@
-package com.example.matchmakingtest.ui.screen.game.models
+package com.example.matchmakingtest.ui.models
 
 sealed class GameScreenUiAction {
     object TryToConnect: GameScreenUiAction()

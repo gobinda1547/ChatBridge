@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.example.matchmakingtest.ui.navigation.AppNavigationHost
+import com.example.matchmakingtest.ui.ChatScreen
 import com.example.matchmakingtest.ui.theme.MatchMakingTestTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MatchMakingTestTheme {
-                AppNavigationHost()
+                ChatScreen()
             }
         }
     }
