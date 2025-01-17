@@ -2,9 +2,14 @@ package com.example.matchmakingtest.ui.screen.game
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
@@ -15,31 +20,43 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.example.matchmakingtest.ui.screen.game.models.ConnectionState
+import com.example.matchmakingtest.ui.screen.game.models.GameScreenState
+import com.example.matchmakingtest.ui.screen.game.models.GameScreenUiAction
 import com.example.matchmakingtest.ui.screen.game.views.ChatInputDesign
 import com.example.matchmakingtest.ui.screen.game.views.ChatMessagesView
 import com.example.matchmakingtest.ui.screen.game.views.TopAppBarDesign
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun GameScreen(
     navController: NavController,
     viewModel: GameViewModel = hiltViewModel()
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
+    val imeHeight = with(LocalDensity.current) { WindowInsets.ime.getBottom(this).toDp() }
 
-    Scaffold(topBar = { TopAppBarDesign("Random Chat") }) { innerPadding ->
+    Scaffold(topBar = { TopAppBarDesign("Random Chatting") }) { innerPadding ->
         Box(
             modifier = Modifier
-                .padding(innerPadding)
-                .imePadding()
                 .fillMaxSize()
+                .padding(
+                    bottom = if (WindowInsets.isImeVisible) imeHeight else innerPadding.calculateBottomPadding(),
+                    start = innerPadding.calculateStartPadding(LayoutDirection.Ltr),
+                    end = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
+                    top = innerPadding.calculateTopPadding()
+                )
         ) {
-            GameScreenMainContent(state.value, onUiAction = { handleUiAction(it, viewModel) })
+            GameScreenMainContent(
+                state.value,
+                onUiAction = { handleUiAction(it, viewModel) }
+            )
         }
     }
 }
@@ -86,18 +103,4 @@ fun GameScreenMainContentConnected(
         Spacer(modifier = Modifier.size(8.dp))
         ChatInputDesign(bgColor = Color.LightGray, onUiAction)
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewGameScreenMainContentConnected() {
-    val sampleState = GameScreenState(
-        connectionState = ConnectionState.Connected,
-        messages = listOf(
-            SingleMessage("Hello", MessageSentOrReceived.Sent),
-            SingleMessage("How are you?", MessageSentOrReceived.Received),
-            SingleMessage("I'm fine, thank you!", MessageSentOrReceived.Sent)
-        )
-    )
-    GameScreenMainContentConnected(sampleState, onUiAction = {})
 }

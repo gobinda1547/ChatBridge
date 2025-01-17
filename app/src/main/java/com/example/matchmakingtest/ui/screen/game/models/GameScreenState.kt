@@ -1,4 +1,4 @@
-package com.example.matchmakingtest.ui.screen.game
+package com.example.matchmakingtest.ui.screen.game.models
 
 data class GameScreenState(
     val connectionState: ConnectionState = ConnectionState.NotConnected,

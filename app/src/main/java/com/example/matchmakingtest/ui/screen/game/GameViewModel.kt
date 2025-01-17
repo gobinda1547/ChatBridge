@@ -3,6 +3,10 @@ package com.example.matchmakingtest.ui.screen.game
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.matchmakingtest.app.logI
+import com.example.matchmakingtest.ui.screen.game.models.ConnectionState
+import com.example.matchmakingtest.ui.screen.game.models.GameScreenState
+import com.example.matchmakingtest.ui.screen.game.models.MessageSentOrReceived
+import com.example.matchmakingtest.ui.screen.game.models.SingleMessage
 import com.gobinda.connection.api.ConnReqResult
 import com.gobinda.connection.api.RemoteConnector
 import com.gobinda.connection.api.RemoteDeviceApi

@@ -14,8 +14,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.matchmakingtest.ui.screen.game.MessageSentOrReceived
-import com.example.matchmakingtest.ui.screen.game.SingleMessage
+import com.example.matchmakingtest.ui.screen.game.models.MessageSentOrReceived
+import com.example.matchmakingtest.ui.screen.game.models.SingleMessage
 
 @Composable
 private fun SingleMessageView(message: SingleMessage) {

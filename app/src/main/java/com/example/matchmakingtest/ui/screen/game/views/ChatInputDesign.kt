@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.matchmakingtest.ui.screen.game.GameScreenUiAction
+import com.example.matchmakingtest.ui.screen.game.models.GameScreenUiAction
 import com.example.matchmakingtest.ui.theme.MatchMakingTestTheme
 
 @Composable
