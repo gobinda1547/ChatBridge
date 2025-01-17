@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -143,4 +144,18 @@ fun GameScreenMainContentConnected(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewGameScreenMainContentConnected() {
+    val sampleState = GameScreenState(
+        connectionState = ConnectionState.Connected,
+        messages = listOf(
+            SingleMessage("Hello", MessageSentOrReceived.Sent),
+            SingleMessage("How are you?", MessageSentOrReceived.Sent),
+            SingleMessage("I'm fine, thank you!", MessageSentOrReceived.Sent)
+        )
+    )
+    GameScreenMainContentConnected(sampleState, onUiAction = {})
 }
