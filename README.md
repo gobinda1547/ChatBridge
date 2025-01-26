@@ -33,6 +33,4 @@ will be uploaded soon
 
 
 ## Chat application demo
-<video width="100%" controls>
-  <source src="demos/chat_app_demo.mp4" type="video/mp4">
-</video>
+<img src="demo/chat_app.gif" width="100%">
