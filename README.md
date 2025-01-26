@@ -16,7 +16,7 @@ A simple chat application for demo purpose, was made by using the connection mod
 
 
 ## Basic flow of how connection module works
-<img src="diagrams/connection.png" style="width: 100%; height: 200px; object-fit: cover;">
+<img src="diagrams/connection.png" style="width: 100%; height: 400px; object-fit: cover;">
 
 
 ## Connection module class diagram
