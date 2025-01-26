@@ -1,11 +1,16 @@
-# MatchMakingTest
-MatchMakingTest
+# ChatBridge
 
-
-## Overview
 A library for native android developer to connect two Android phone by using WebRTC library and Firebase. All the connection-related codes are moduled separately in the 'connection' module. 
 </br> </br>
 A simple chat application for demo purpose, was made by using the connection module.
+
+
+## Contents
+- [Features](#features)
+- [Connection basic flow](#connection-basic-flow)
+- [Connection module diagram](#connection-module-diagram)
+- [Chat application setup](#chat-application-setup)
+- [Chat application demo](#chat-application-demo)
 
 
 ## Features
@@ -15,11 +20,11 @@ A simple chat application for demo purpose, was made by using the connection mod
 - Chat application as demo
 
 
-## Basic flow of how connection module works
+## Connection basic flow
 <img src="diagrams/connection.png" width="100%" height="200">
 
 
-## Connection module class diagram
+## Connection module diagram
 will be uploaded soon
 
 
