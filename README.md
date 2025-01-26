@@ -18,7 +18,8 @@ A library for native android developer to connect two Android phone by using Web
 6. Start chating instantly
 
 ## How the connection module works
-<img src="diagrams/connection.png" style="width: 100%; height: 200px; object-fit: cover;">
+<div style="width: 100%; height: 200px; background-image: url('diagrams/connection.png'); background-size: cover; background-position: center;"></div>
+
 
 
 ## Chat application demo
