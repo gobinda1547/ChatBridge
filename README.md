@@ -3,6 +3,8 @@
 A library for native android developer to connect two Android phone by using WebRTC library and Firebase. All the connection-related codes are moduled separately in the 'connection' module. 
 </br> </br>
 A simple chat application for demo purpose, was made by using the connection module.
+</br> </br>
+<img src="demo/chat_app.gif" width="100%">
 
 
 ## Contents
@@ -10,7 +12,6 @@ A simple chat application for demo purpose, was made by using the connection mod
 - [Connection basic flow](#connection-basic-flow)
 - [Connection module diagram](#connection-module-diagram)
 - [Chat application setup](#chat-application-setup)
-- [Chat application demo](#chat-application-demo)
 
 
 ## Features
@@ -22,7 +23,7 @@ A simple chat application for demo purpose, was made by using the connection mod
 
 ## Connection basic flow
 Click over the image to view in full screen.
-<img src="diagrams/connection.png" width="100%" height="600">
+<img src="diagrams/connection.png" width="100%">
 
 
 ## Connection module diagram
@@ -36,7 +37,3 @@ will be uploaded soon
 4. Paste 'google-services.json' file under app folder
 5. Build and run the project on two different devices.
 6. Start chating instantly
-
-
-## Chat application demo
-<img src="demo/chat_app.gif" width="100%">
