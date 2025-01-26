@@ -21,7 +21,8 @@ A simple chat application for demo purpose, was made by using the connection mod
 
 
 ## Connection basic flow
-<img src="diagrams/connection.png" width="100%" height="200">
+Click over the image to view in full screen.
+<img src="diagrams/connection.png" width="100%" height="400">
 
 
 ## Connection module diagram
