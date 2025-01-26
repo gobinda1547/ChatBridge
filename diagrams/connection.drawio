@@ -1,0 +1,223 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36" version="26.0.8">
+  <diagram name="Page-1" id="RCShLvOVTydsxlfMFONa">
+    <mxGraphModel dx="2049" dy="1087" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-49" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry width="820" height="970" as="geometry" />
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-5" value="Phone #1 (Child)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="40" y="120" width="120" height="640" as="geometry" />
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-16" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="QQ01b2TsLE_1b_yJhpVO-5">
+          <mxGeometry x="55" y="60" width="10" height="580" as="geometry" />
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-17" value="generatePreferedRoomID()" style="html=1;align=left;spacingLeft=2;endArrow=block;rounded=0;edgeStyle=orthogonalEdgeStyle;curved=0;rounded=0;" edge="1" target="QQ01b2TsLE_1b_yJhpVO-16" parent="QQ01b2TsLE_1b_yJhpVO-5">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="65" y="70" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="80" y="70" />
+              <mxPoint x="80" y="90" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-26" value="createRemoteDevice()" style="html=1;align=left;spacingLeft=2;endArrow=block;rounded=0;edgeStyle=orthogonalEdgeStyle;curved=0;rounded=0;exitX=1.044;exitY=0.249;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1.013;entryY=0.288;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="QQ01b2TsLE_1b_yJhpVO-5">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="65.31000000000006" y="200.52000000000004" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="80" y="200" />
+              <mxPoint x="80" y="221" />
+              <mxPoint x="70" y="221" />
+            </Array>
+            <mxPoint x="65.00000000000011" y="220.7999999999999" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-33" value="collectIceCandidates()" style="html=1;align=left;spacingLeft=2;endArrow=block;rounded=0;edgeStyle=orthogonalEdgeStyle;curved=0;rounded=0;exitX=1.033;exitY=0.596;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1.033;entryY=0.636;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="QQ01b2TsLE_1b_yJhpVO-5">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="65.00000000000004" y="349.99999999999994" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="79.67" y="350.08" />
+              <mxPoint x="79.67" y="371.08" />
+              <mxPoint x="74.67" y="371.08" />
+            </Array>
+            <mxPoint x="65.00000000000004" y="370.7999999999999" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-41" value="setCandidatesToRemoteDevice and&lt;div&gt;waitForOnConnectFromWebRtcLib()&lt;/div&gt;" style="html=1;align=left;spacingLeft=2;endArrow=block;rounded=0;edgeStyle=orthogonalEdgeStyle;curved=0;rounded=0;exitX=1.043;exitY=0.767;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1.085;entryY=0.803;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="QQ01b2TsLE_1b_yJhpVO-5" source="QQ01b2TsLE_1b_yJhpVO-16" target="QQ01b2TsLE_1b_yJhpVO-16">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="70.00000000000006" y="505" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="80" y="505" />
+              <mxPoint x="80" y="526" />
+            </Array>
+            <mxPoint x="70.00000000000006" y="525.8" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-6" value="Firebase" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="280" y="120" width="120" height="640" as="geometry" />
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-20" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="QQ01b2TsLE_1b_yJhpVO-6">
+          <mxGeometry x="55" y="60" width="10" height="580" as="geometry" />
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-8" value="Phone #2 (Leader)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="520" y="120" width="120" height="640" as="geometry" />
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-18" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="QQ01b2TsLE_1b_yJhpVO-8">
+          <mxGeometry x="55" y="60" width="10" height="580" as="geometry" />
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-19" value="generatePreferedRoomID()" style="html=1;align=left;spacingLeft=2;endArrow=block;rounded=0;edgeStyle=orthogonalEdgeStyle;curved=0;rounded=0;" edge="1" parent="QQ01b2TsLE_1b_yJhpVO-8" target="QQ01b2TsLE_1b_yJhpVO-18" source="QQ01b2TsLE_1b_yJhpVO-18">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="70" y="70" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="80" y="70" />
+              <mxPoint x="80" y="90" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-25" value="createRemoteDevice()" style="html=1;align=left;spacingLeft=2;endArrow=block;rounded=0;edgeStyle=orthogonalEdgeStyle;curved=0;rounded=0;exitX=0.988;exitY=0.428;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1.024;entryY=0.447;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="QQ01b2TsLE_1b_yJhpVO-8">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="65" y="210.00999999999993" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="80" y="210" />
+              <mxPoint x="80" y="230" />
+              <mxPoint x="65" y="230" />
+            </Array>
+            <mxPoint x="65.24000000000001" y="229.21999999999997" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-34" value="collectIceCandidates()" style="html=1;align=left;spacingLeft=2;endArrow=block;rounded=0;edgeStyle=orthogonalEdgeStyle;curved=0;rounded=0;" edge="1" parent="QQ01b2TsLE_1b_yJhpVO-8" source="QQ01b2TsLE_1b_yJhpVO-18">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="70" y="359.99999999999994" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="80" y="360" />
+              <mxPoint x="80" y="380" />
+            </Array>
+            <mxPoint x="65" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-42" value="setCandidatesToRemoteDevice and&lt;br&gt;&lt;span style=&quot;background-color: light-dark(#ffffff, var(--ge-dark-color, #121212)); color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;waitForOnConnectFromWebRtcLib&lt;/span&gt;()" style="html=1;align=left;spacingLeft=2;endArrow=block;rounded=0;edgeStyle=orthogonalEdgeStyle;curved=0;rounded=0;" edge="1" parent="QQ01b2TsLE_1b_yJhpVO-8" source="QQ01b2TsLE_1b_yJhpVO-18">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="70" y="505" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="85" y="504" />
+              <mxPoint x="85" y="525" />
+            </Array>
+            <mxPoint x="65" y="525" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-12" value="getRemoteOrWaitInQueue(#R1)" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;entryX=-0.099;entryY=0.749;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="105" y="240.0000000000001" as="sourcePoint" />
+            <mxPoint x="334.01" y="240.0000000000001" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-13" value="getRemoteOrWaitInQueue(#R2)" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;exitX=-0.043;exitY=0.601;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="574.5699999999999" y="260" as="sourcePoint" />
+            <mxPoint x="345" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-21" value="listenForOneTimeOffer(#R1)" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=5;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="105" y="370.0000000000017" as="sourcePoint" />
+            <mxPoint x="335" y="370.0000000000017" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-23" value="listenForOneTimeAnswer(#R1)" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;entryX=0.968;entryY=0.229;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="574.9999999999998" y="410.00000000000006" as="sourcePoint" />
+            <mxPoint x="344.68000000000006" y="410.00000000000006" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-24" value="remoteRoomIDFound(#R1)" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;exitX=1.008;exitY=0.649;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="345.08000000000015" y="319.99999999999994" as="sourcePoint" />
+            <mxPoint x="575" y="319.99999999999994" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-27" value="nobodyInTheQueue()" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;entryX=1.065;entryY=0.249;entryDx=0;entryDy=0;entryPerimeter=0;exitX=-0.052;exitY=0.26;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="334.48" y="300.52" as="sourcePoint" />
+            <mxPoint x="105.65000000000009" y="299.9999999999999" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-29" value="sendOfferToRoom(#R1)" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;entryX=0.968;entryY=0.229;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="574.4999999999998" y="380.00000000000006" as="sourcePoint" />
+            <mxPoint x="344.18000000000006" y="380.00000000000006" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-30" value="receiveOfferFromRoom(#R1)" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;entryX=1.065;entryY=0.249;entryDx=0;entryDy=0;entryPerimeter=0;exitX=-0.052;exitY=0.26;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="333.5" y="421" as="sourcePoint" />
+            <mxPoint x="105.5" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-31" value="sendAnswerToRoom(#R1)" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;entryX=-0.099;entryY=0.749;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="105" y="450.0000000000001" as="sourcePoint" />
+            <mxPoint x="334.01" y="450.0000000000001" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-32" value="receiveAnswerFromRoom(#R1)" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;exitX=1.008;exitY=0.649;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="345.08000000000015" y="459.99999999999994" as="sourcePoint" />
+            <mxPoint x="575" y="459.99999999999994" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-35" value="sendIceCandidatesAsChild(#R1)" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=5;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="105" y="520.0000000000017" as="sourcePoint" />
+            <mxPoint x="335" y="520.0000000000017" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-36" value="listenForIceCandidatesFromChild(#R1)" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;entryX=0.968;entryY=0.229;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="574.9999999999998" y="560" as="sourcePoint" />
+            <mxPoint x="344.68000000000006" y="560" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-37" value="sendIceCandidatesAsLeader(#R1)" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;entryX=0.968;entryY=0.229;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="574.4999999999998" y="530" as="sourcePoint" />
+            <mxPoint x="344.18000000000006" y="530" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-38" value="listenForIceCandidatesFromLeader(#R1)" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;entryX=-0.099;entryY=0.749;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="105" y="550.0000000000001" as="sourcePoint" />
+            <mxPoint x="334.01" y="550.0000000000001" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-39" value="receivedIceCandidatesFromLeader(#R1)" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;entryX=1.065;entryY=0.249;entryDx=0;entryDy=0;entryPerimeter=0;exitX=-0.052;exitY=0.26;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="333.25" y="601" as="sourcePoint" />
+            <mxPoint x="105.25" y="600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-40" value="receivedIceCandidatesFromChild(#R1)" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;exitX=1.008;exitY=0.649;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="344.83000000000015" y="590" as="sourcePoint" />
+            <mxPoint x="574.75" y="590" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-43" value="Both devices are connected - Use the remote device object to send/receive data" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="680" width="540" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-44" value="How 2 phones get connected by using WebRTC lib and Firebase | Diagram of best case" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="750" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-45" value="All the listeners call are just for one time means once some data will be received in that path the listener will be closed." style="rounded=0;whiteSpace=wrap;html=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="800" width="750" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-46" value="Some steps are not included here (createOffer, createAnswer, handleOffer, handleAnswer) - as they are just simple calls to WebRTC lib." style="rounded=0;whiteSpace=wrap;html=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="840" width="750" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="QQ01b2TsLE_1b_yJhpVO-47" value="Used a thread safe way while collecting remote device&#39;s preferred room ID from Firebase - Thanks firebase for providing these APIs." style="rounded=0;whiteSpace=wrap;html=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="880" width="750" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
