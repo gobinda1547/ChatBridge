@@ -18,4 +18,7 @@ A library for native android developer to connect two Android phone by using Web
 6. Start chating instantly
 
 ## How the connection module works
+![Connection Module Diagram](diagrams/connection.png)
 
+
+##
