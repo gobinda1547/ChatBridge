@@ -22,7 +22,7 @@ A simple chat application for demo purpose, was made by using the connection mod
 
 ## Connection basic flow
 Click over the image to view in full screen.
-<img src="diagrams/connection.png" width="100%" height="400">
+<img src="diagrams/connection.png" width="100%" height="600">
 
 
 ## Connection module diagram
